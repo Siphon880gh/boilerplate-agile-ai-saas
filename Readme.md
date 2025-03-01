@@ -143,6 +143,20 @@ Furthermore for the menu, when releasing the app, you may want users to report b
 
 Some menu items may benefit from a drawer or dropdown approach that opens a secondary menu, therefore we have a dropdown.css at assets/.
 
+Going back to the Google forms, it'll best fit the drawer or dropdown criteria.
+
+menus/app.php:
+```
+<div class="dropdown-wrapper logged-in hidden-important">
+  <a href="javascript:void(0)" class="dropdown-toggle">Tester Resources</a>
+  <div class="dropdown-content">
+      <a href="#" target="_blank">Survey</a>
+      <a href="#" target="_blank">Report Bug</a>
+      <a href="#" target="_blank">Request Feature</a>
+  </div>
+</div>
+```
+
 ### Modal windows
 
 You may want modal window for information that needs focused or points of the app that's important. Things to appear in a modal window include login, signup, and walkthrough videos. The modal window allows the user to click out to return back to the app especially if a modal is a "pause point" (for example, user watching a walkthrough video to get the gist of the app). The walkthrough video could be accessed on and individual page (for a walkthrough on that particular feature) and/or from the menu (for a walkthrough of the entire app). Because we are using PHP, we can have a modals.php at the app root that is rendered into index.php. Any of the demo's will be able to access the modal to fill it dynamically or to simply hide/unhide it.
@@ -150,6 +164,12 @@ You may want modal window for information that needs focused or points of the ap
 This boilerplate includes the menu and modal window system we just talked about at modals.php and menus/app.php. The menu named as an "app menu". You could add submenu's in the same folder and name them appropriately.
 
 The menu item "Walkthrough" opens a modal that plays the video at assets/videos/demo-walkthrough.mp4 which is a placeholder video.
+
+We've added an experimental modal that's only accessible by stakeholders through knowledge of the password, and it's where you could add features to be tested but not available to other testers. You type "secret" on the webpage and a modal with the Experimental features open:
+
+![screenshot](Readme-assets/snapshot-2-experimental.png)
+
+^The typing password secret is made possible by the secretMenu.init() method in root assets/index.js.
 
 ### Alpine JS Iframes and Unified Model
 
@@ -207,13 +227,52 @@ You set which Alpine JS iframe is the first to appear on the page when user visi
 
 In the future, if you have to insert new pages inbetween, you can have them as IDs 10X, for example, 101 between 1 and 2, then eventually reorder them to be 1, 2 (the new one), 3 and make sure updating assets/screens.js constants to reflect that. If you’re adding pages before page 1 (like 3 additional pages), you can use -1, -2, -3
 
+Not all the `app-NAME` folders like `app-write-prompt` are Alpine JS iframes, especially as the app grows in complexity. For example, `app-add-text-overlays` is NOT an Alpine JS iframe - it's a PHP partial that does go into another Alpine JS iframe `app-upload-files`. Therefore, you should comment at the top of each module's index.php or index.html, AND create a documentation of what type of modules they are. Here are example top line comments:
+```
+<!-- Module type: PHP partial at an iframe module "app-upload-files" -->
+<!-- Module type: iframe module -->
+<!-- Module type: iframe rerouter module that redirects to another iframe module after saving resuming models to window.parent -->
+```
+
+^ Btw the rerouter module we don't have for this snapshot. It'll be a future snapshot where a user can edit a completed slideshow and a resuming model will be referenced to re-render the app-write-prompt page with the old instructions the user had provided. This will be covered when we add user ability, which we don't have in this snapshot (is all frontend).
+
 ### Many online features skipped for now
 
 Because we don't have user authentication yet, it doesn't make sense to add AI assisted writing of the slideshow instructions or to add actual file uploading. It'll only crowd the files. We will add user features in the next snapshot.
 
 ### Brand Combo Switching in Lieu of Whitelabeling
 
-Because we now are making a full frontend app, you may want to offer different combinations of colors, fonts, button styles, etc to the team. Therefore, we created a whitelabeling system that allows switching style assets and settings depending on the "company", but for the purposes of snapshot 2 where your app is not online yet, it's experimenting with different color combinations. Looking at `assets--whitelabeler/` you'll see there are different sets of css files for default and partner1. At each demo, aka module, the code refers to a brand-loader.php to determine whether to load the default or partner1. And at index.php which frames the entire app, you see in the code a brand-loader.php as well because there are visual elements on the rest of the app around the iframe. That index.php ALSO has code referencing brand-loader-by-url.php which looks for a ?co=default or ?co=partner1 in the url to override which brand colors to load in (say you send a custom url to a stakeholder to see how certain color combinations look). There are js and php files whihc are simply variables to the name of the company, colors, logo paths, etc that are needed to complete the styling.
+Because we now are making a full frontend app, you may want to offer different combinations of colors, fonts, button styles, etc to the team. Therefore, we created a whitelabeling system that allows switching style assets and settings depending on the "company", but for the purposes of snapshot 2 where your app is not online yet, it's experimenting with different color combinations. Looking at `assets--whitelabeler/` you'll see there are different sets of css files for default and partner1. At each demo, aka module, the code refers to a `brand-loader.php` to determine whether to load the default or partner1. And at index.php which frames the entire app, you see in the code a brand-loader.php as well because there are visual elements on the rest of the app around the iframe. That index.php ALSO has code referencing `brand-loader-by-url.php` which looks for a ?`co=default` or `?co=partner1` in the url to override which brand colors to load in (say you send a custom url to a stakeholder to see how certain color combinations look). There are js and php files whihc are simply variables to the name of the company, colors, logo paths, etc that are needed to complete the styling.
+
+We moved our common brand styling for the demo's from `assets/common.css` (as in Snapshot 1) out into `assets--whitelabeler`. Notice in this snapshot, the common.css is shorter in code. Common.css still makes sense to have because it could have styling rules that applies to the app regardless of brand or color combination.
+
+Set the base colors at:
+```
+/* OUR BRAND COLORS */
+:root {
+    --primary-color: #6F42C1 !important;
+    --primary-color-tinted: #9F74D5 !important;
+    /* Lighter version of #6F42C1 */
+    --primary-color-shaded: #4B2C86 !important;
+    /* Darker version of #6F42C1 */
+    --primary-color-contrasted: white !important;
+
+    --primary-color-o10: rgba(111, 66, 193, 0.10) !important;
+    --primary-color-o20: rgba(111, 66, 193, 0.20) !important;
+    --primary-color-o30: rgba(111, 66, 193, 0.30) !important;
+    --primary-color-o75: rgba(111, 66, 193, 0.75) !important;
+    --primary-color-o80: rgba(111, 66, 193, 0.80) !important;
+
+    --main-background: url("./background-default.jpg");
+
+    --heading-font: Montserrat, sans-serif !important;
+    --body-font: 'Open Sans' !important;
+    --text: black;
+}
+...
+```
+And use the brand styling classes like textcolor-brand, h2-brand, etc found in the same css file
+
 
 ### Breadcrumb steps
 
@@ -235,30 +294,16 @@ This steps snippet wouldn't be added to `app-add-text-overlays` because that's a
 
 The favico is a white square. You could work with your team to design the favico for the website (the icon that appears on browser tab, favorites, and Google search engine). Tip when designing icons and logos, you guys may want to work on only a black and white graphic, then later discuss the colors.
 
-In a related note, you may want to adjust the meta tags at index.php. It makes sense as you're discussing how the app works as a whole, and how it looks to keep brand identity, then you may want to discuss how the app is seen on the google search, at least preliminarily. Having no meta tags or improper meta tags could harm your SEO when deploying online soon, so having something is better than nothing. Then later you can work with the marketing department to make the meta tags better.
+In a related note, you may want to adjust the meta tags at index.php. It makes sense as you're discussing how the app works as a whole, and how it looks to keep brand identity, then you may want to discuss how the app is seen on the google search, at least preliminarily. Having no meta tags or improper meta tags could harm your SEO when deploying online soon, so having something is better than nothing. Then later you can work with the marketing department to make the meta tags better. For instance, meta tags include at root index.php:
+
+```
+<meta property="og:title" content="COMPANY_NAME" />
+```
 
 
 ---
 
 ## III. User Ability and Database (Snapshot 3)
 
-Example user membership collection:
-```
-
-_id 67c2b6f7aab1143336ebfd80
-userId  "67c2b6f7aab1143336ebfd7f"
-appId   "APP_ABBREV"
-tierLevel   0
-billId  0
-billStarted 0
-billLate    0
-billNext    0
-creditsAddons Array (empty)
-creditsAvailable    3
-creditsTimesOne 99
-creditsMonthlyResetNumber   1
-createdOn   "2025-02-28 23:27:51"
-trialStarted    "2025-02-28 23:27:51"
-```
 
 **TO BE CONTINUED... WIP since 3/1/25**

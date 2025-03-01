@@ -70,7 +70,6 @@ const textEditor = {
 
         if(window.parent.resumingModelAIPrompt) {
             this.textarea.value = window.parent.resumingModelAIPrompt;
-            this.updateUIRewriteCount();
         }
 
         return {

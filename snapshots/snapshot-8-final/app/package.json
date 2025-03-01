@@ -8,15 +8,7 @@
     "dev": "echo 'DEVELOPER Mode:\nFetch instead of multithreading with SSE. Slower. Good at raising errors. Video Microservice API still runs because translate video will revert to SSE, while main video generation will stick to fetch.\n\n'; cd build-scripts && npm run change-video-server:fetch; cd ../ && concurrently 'python microservices/api_service.py' 'python microservices/video_engine.py'",
     "dev1": "echo 'API Microservice\n'; python microservices/api_service.py",
     "dev2": "echo 'Video Microservice\n'; python microservices/video_engine.py",
-    "seed": "python seed.py",
-    "test-docker": "python tests/docker.py",
-    "test-path": "echo $PATH",
-    "restart-APP_SERVER": "echo 'RESTART PROCESSES\nIgnore errors because we are making sure everything shuts down.\n1. Shutdown supervisor.\n2. Shutdown all gunicorn which sometimes shutting down supervisor does not shut them down.\n3. Run build scripts for GoDaddy.\n4. Restart supervisor with designated supervisor log path (No need to pyenv activate because supervisor will run shell script that activates the pyenv app4 virtual environment before running gunicorn)'; sudo systemctl stop supervisor; supervisorctl shutdown ; sleep 2s && ps aux | grep 5001 | grep -v grep | awk '{print $2}' | xargs kill ; sleep 2s && ps aux | grep 5002 | grep -v grep | awk '{print $2}' | xargs kill ; sleep 1s && cd build-scripts && npm run build-APP_SERVER; sudo supervisord -c /etc/supervisor/supervisord.conf -l /var/log/supervisor/supervisord.log && echo 'Restarted supervisor'",
-    "shutdown-APP_SERVER": "echo 'SHUTDOWN PROCESSES\nIgnore errors because we are making sure everything shuts down.\n1. Shutdown supervisor.\n2. Shutdown all gunicorn which sometimes shutting down supervisor does not shut them down.'; sudo systemctl stop supervisor; supervisorctl shutdown ; sleep 2s && ps aux | grep 5001 | grep -v grep | awk '{print $2}' | xargs kill ; sleep 2s && ps aux | grep 5002 | grep -v grep | awk '{print $2}' | xargs kill",
-    "start-APP_SERVER": "echo 'START PROCESSES'; cd build-scripts && npm run build-APP_SERVER; sudo supervisord -c /etc/supervisor/supervisord.conf -l /var/log/supervisor/supervisord.log",
-    "log-APP_SERVER": "cat /var/log/supervisor/app-api-error.log; cat /var/log/supervisor/app-video-error.log",
-    "test-APP_SERVER": "concurrently './infrastructure/supervisor-app-runs/supervisor_APP_SERVER_api.sh' './infrastructure/supervisor-app-runs/supervisor_APP_SERVER_video.sh'",
-    "seed-APP_SERVER": "sudo python3 seed.py; rm -R ./users/*"
+    "seed": "python seed.py"
   },
   "author": "",
   "license": "ISC",
