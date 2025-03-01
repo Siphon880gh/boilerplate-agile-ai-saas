@@ -1,0 +1,17 @@
+<Files "package.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Increase file upload size limits
+php_value upload_max_filesize 100M
+php_value post_max_size 100M
+php_value memory_limit 128M
+
+# Increase execution time and input time
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# Optional: LimitRequestBody directive for Apache
+# This sets the maximum size of the HTTP request body
+LimitRequestBody 104857600

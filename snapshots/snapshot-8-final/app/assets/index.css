@@ -1,0 +1,50 @@
+.credit-status::after {
+  content: "\00a0 credits"
+}
+.modal.show {
+  display:flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#bottom-left {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px !important;
+  padding: 10px 0;
+  margin-left: -5px;
+}
+
+#bottom-left:empty {
+  display: none;
+}
+
+#bottom-left a {
+  color: white;
+  transition: color 200ms ease-in-out;
+}
+
+#bottom-right:empty {
+  display: none;
+}
+
+.icon {
+  cursor: pointer;
+}
+.hidden-important {
+  display: none !important;
+}
+
+@media screen and (max-width: 768px) {
+  .menu-primary {
+    overflow-x: scroll;
+    overflow-y: visible;
+  }
+}
+
+.menu-secondary {
+  transition: width 0.5s;
+}
+
+.menu-secondary:not(:empty) {
+  border-top: 1px solid gray;
+}

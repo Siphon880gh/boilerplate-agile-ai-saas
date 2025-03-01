@@ -1,0 +1,19 @@
+#submit[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    background-color: #ccc !important;
+}
+
+.disabled:hover {
+    background-color: #ccc !important;
+}
+
+#undoBtn[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}

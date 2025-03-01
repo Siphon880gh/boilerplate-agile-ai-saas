@@ -1,0 +1,53 @@
+.dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    left: 0;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    max-height: 0;
+    /* Initially hide the content */
+    overflow: hidden;
+    width: 250px;
+    /* Expanded width for the dropdown */
+}
+
+@media screen and (max-width: 768px) {
+    .dropdown-content {
+        position: relative;
+        left: 0;
+        width: 100%;
+    }
+}
+
+.dropdown-content a {
+    text-decoration: none;
+    display: block;
+    margin: 5px 0;
+    color: #000;
+    padding: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown-wrapper.open .dropdown-content {
+    display: block;
+    opacity: 1;
+    max-height: 300px;
+    /* Set a reasonable max height for the slide down */
+}
+
+/* Add dividers between dropdown items */
+.dropdown-content a:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+}
