@@ -59,81 +59,9 @@ cbust_ipad;
     const appId = window.parent.getAppId();
     const caseId = window.parent.getCaseId();
 
-    // Create FormData object
-    const formData = new FormData();
-    
-    // Add metadata
-    formData.append('userId', userId);
-    formData.append('appId', appId);
-    formData.append('caseId', caseId);
-    
-    // Add each file to the FormData
-    window.files.forEach((file, index) => {
-        if (file.size > maxFileSize) {
-          alert(`File ${file.name} exceeds the 10MB size limit.`);
-          $('#is-uploading-php').addClass('d-none');
-          return; // Cancel the upload
-        }
-        if (file.isUrl) {
-            formData.append(`url-${index}`, file.url);
-        } else {
-            formData.append(`file-${index}`, file, file.name);
-        }
-    });
-    
-    // Send data to the server using fetch
-    fetch('upload-files.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Network response was not ok: " + response.status);
-        }
-        return response.json();
-    })
-    .then(payload => {
-        console.log("Server response:", payload);
-        $('#is-uploading-php').addClass('d-none');
-        if (payload.error) {
-            alert("Error: " + payload.error);
-        } else {
-            // Handle success
-
-            // Adapt the labeled pics as data transfer object to send to API endpoint at getFilesForBuildingVideo
-            let labelsDTO = {}
-            for(key in window?.labelsModel) {
-                $(".filename").each((i, filenameEl)=>{
-                    if(key.toLowerCase() === filenameEl.textContent.trim().toLowerCase()) {
-                        // console.log(key.toLowerCase());
-                        labelsDTO[i] = window?.labelsModel[key]
-                    }
-                });
-            }
-
-            // Update core assets at content collection, and the requestpayload will not be long
-            window.parent.mainController.updateDbModel({
-              appId: appId,
-              userId: userId,
-              caseId: caseId,
-              files: payload.files,
-              labels: labelsDTO
-            })
-            
-
-            // Update aux assets at content collection, and the request payload could potentially be long especially when add more features
-            window.parent.mainController.addToJobQueue({
-              labels: labelsDTO
-            }, (resource)=>{
-              window.parent.mainController.performJob(resource.serverVideoMode, resource.jobId);
-            })
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        $('#is-uploading-php').addClass('d-none');
-        alert("Error uploading files: " + error.message);
-    });
+    // TODO: Upload files to the server in the next version
+    alert("TODO: Upload files to the server in the next version. Files would be saved in this format: file-<index>-aAPP_ABBREV-cCASE_ID-uUSER_ID.filetype. Proceeding to fake generation of slideshow.");
+    window.parent.switchPanel(SCREENS.PreviewSlideshow);
   } // messageParent
   </script>
 
