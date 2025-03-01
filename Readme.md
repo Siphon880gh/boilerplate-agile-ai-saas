@@ -115,6 +115,15 @@ Each demo should link to a common css file (like common.css) that is outside the
 
 Implemented a cache busting at all demo's by using a common assets/version-cache-bust.php. You could have it always cache bust with a random number or a time() or have it cache incrementally with a version number. Cache busting is necessary at this stage if you will be sharing the links to stakeholders who may not be technical enough to know how to clear their cache (when they can't see your latest changes). This cache busting and cache control can carry to the rest of the future snapshots.
 
+You may see PHP snippets like this at many of the demo's, which is just a sugar syntax available in PHP to make it easy to code in $v for the cache busting portion of the URL, and that $v is controlled by version-cache-bust.php:
+```
+<?php
+echo <<<cbust_ipad
+  <script src="assets/common.css$v"></script>
+cbust_ipad;
+?>
+```
+
 
 ---
 
