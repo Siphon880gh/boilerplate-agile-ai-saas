@@ -1,5 +1,0 @@
-{
-    "db_name": "saas-template",
-    "db_INFO": "If your Mongo DB is password protected, use .env.local to set MONGO_USER and MONGO_PASSWORD",
-    "app_abbrev": "APP_ABBREV"
-}

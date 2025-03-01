@@ -1,0 +1,469 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.header h1 {
+    margin-bottom: 1rem;
+}
+
+.option-cards {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.option-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+}
+
+.option-card i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.option-card h3 {
+    margin-bottom: 1rem;
+}
+
+.upload-interface {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.url-input {
+    margin-bottom: 2rem;
+}
+
+.url-input input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+}
+
+.url-input input::placeholder {
+    text-align: center;
+}
+
+.dropzone {
+    border: 2px dashed var(--primary-color);
+}
+
+.dropzone.dragover {
+    background: #e3f2fd;
+    border-color: var(--primary-color-tinted);
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    background: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    padding: 1rem;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item .remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 10px;
+    opacity: .8;
+}
+
+.preview-item .filename {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0.5rem auto;
+    text-align: center;
+    width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+/* File type SVG icons */
+.preview-item .file-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 0.5rem;
+}
+
+.preview-item .file-icon.audio {
+    color: #FF5722;
+}
+
+.preview-item .file-icon.video {
+    color: #2196F3;
+}
+
+.preview-item .file-icon.url {
+    color: #4CAF50;
+}
+
+.preview-item .file-icon.text {
+    color: #9C27B0;
+}
+
+.preview-item .file-icon.pdf {
+    color: #F44336;
+}
+
+.preview-item .file-icon.misc {
+    color: #607D8B;
+}
+
+/* Add these SVG definitions at the end of your CSS file */
+.preview-item[data-type="audio"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF5722'%3E%3Cpath d='M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="video"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232196F3'%3E%3Cpath d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="url"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234CAF50'%3E%3Cpath d='M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="text"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239C27B0'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="pdf"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23F44336'%3E%3Cpath d='M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="misc"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23607D8B'%3E%3Cpath d='M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z'/%3E%3C/svg%3E");
+}
+
+.preview-item[data-type="audio"] audio,
+.preview-item[data-type="video"] video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item[data-type="audio"] .file-icon,
+.preview-item[data-type="video"] .file-icon,
+.preview-item[data-type="text"] .file-icon,
+.preview-item[data-type="pdf"] .file-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Adjust preview item for audio/video */
+.preview-item.with-player {
+    aspect-ratio: 16/9;
+    padding: 0.5rem;
+}
+
+/* Add hover effect for text and PDF files */
+.preview-item[data-type="text"] .file-icon:hover,
+.preview-item[data-type="pdf"] .file-icon:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Add Word document icon color */
+.preview-item .file-icon.doc {
+    color: #2B579A;  /* Microsoft Word blue */
+}
+
+/* Add Word document SVG icon */
+.preview-item[data-type="doc"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232B579A'%3E%3Cpath d='M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM8 16h2v2H8v-2zm0-4h2v2H8v-2zm0-4h2v2H8V8zm4 8h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V8z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Add hover effect for Word documents */
+.preview-item[data-type="doc"] .file-icon:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Update Excel icon color */
+.preview-item .file-icon.excel {
+    color: #217346;  /* Excel green */
+}
+
+/* Update CSV icon color */
+.preview-item .file-icon.csv {
+    color: #217346;  /* Using same green as Excel */
+}
+
+/* Update Excel SVG icon with a more spreadsheet-like appearance */
+.preview-item[data-type="excel"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23217346'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20v-2h12v2H6zm12-4H6v-2h12v2zm0-4H6v-2h12v2zm-7-4V3.5L16.5 9H11z'/%3E%3Crect x='7' y='10' width='4' height='2'/%3E%3Crect x='13' y='10' width='4' height='2'/%3E%3Crect x='7' y='14' width='4' height='2'/%3E%3Crect x='13' y='14' width='4' height='2'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Update CSV SVG icon with a more distinctive spreadsheet look */
+.preview-item[data-type="csv"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23217346'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20v-2h12v2H6zm12-4H6v-2h12v2zm0-4H6v-2h12v2zm-7-4V3.5L16.5 9H11z'/%3E%3Ctext x='7' y='15' style='font-size: 6px;'>CSV</text>%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Add hover effects for spreadsheet files */
+.preview-item[data-type="excel"] .file-icon:hover,
+.preview-item[data-type="csv"] .file-icon:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Ensure consistent background properties for spreadsheet icons */
+.preview-item[data-type="excel"] .file-icon,
+.preview-item[data-type="csv"] .file-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Text preview styles */
+.preview-item.with-text-preview {
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 200px;
+}
+
+.preview-item .text-preview {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    overflow: auto;
+    max-height: 150px;
+    width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid #ddd;
+}
+
+/* PDF preview styles */
+.preview-item.with-pdf-preview {
+    aspect-ratio: auto;
+    height: auto;
+    padding: 0.5rem;
+}
+
+.preview-item .pdf-preview {
+    position: relative;
+    width: 100%;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+.preview-item .pdf-preview canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.preview-item .pdf-preview .page-count {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    border-top-left-radius: 4px;
+}
+
+/* Add these new styles */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.url-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.url-input {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    flex: 1;
+}
+
+.url-input:focus {
+    outline: none;
+    border-color: var(--primary-color-tinted);
+}
+
+/* Update existing preview-item styles for URLs */
+.preview-item[data-type="url"] {
+    background: #f8f9fa;
+}
+
+.preview-item[data-type="url"] .filename {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.preview-item[data-type="url"] .filename:hover {
+    text-decoration: underline;
+}
+
+/* Upload panels layout */
+.upload-panels {
+    display: flex;
+    /* display: grid;
+    grid-template-columns: 3fr 2fr; */
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.upload-panel {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* URL panel specific styles */
+.url-panel {
+    border: 2px solid var(--primary-color);
+}
+
+/* Add JSON icon color */
+.preview-item .file-icon.json {
+    color: #FBC02D;  /* Material Yellow 700 */
+}
+
+/* Add XML icon color */
+.preview-item .file-icon.xml {
+    color: #0097A7;  /* Material Cyan 700 */
+}
+
+/* Add JSON SVG icon */
+.preview-item[data-type="json"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FBC02D'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20v-2h12v2H6zm12-4H6v-2h12v2zm0-4H6v-2h12v2z'/%3E%3Ctext x='7' y='15' style='font-size: 4px;font-weight:bold;'>JSON</text>%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Add XML SVG icon */
+.preview-item[data-type="xml"] .file-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230097A7'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20v-2h12v2H6zm12-4H6v-2h12v2zm0-4H6v-2h12v2z'/%3E%3Ctext x='8' y='15' style='font-size: 4px;font-weight:bold;'>XML</text>%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Add hover effects for data files */
+.preview-item[data-type="json"] .file-icon:hover,
+.preview-item[data-type="xml"] .file-icon:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Ensure consistent background properties for all file icons */
+.preview-item[data-type="excel"] .file-icon,
+.preview-item[data-type="csv"] .file-icon,
+.preview-item[data-type="json"] .file-icon,
+.preview-item[data-type="xml"] .file-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Add these styles for HEIC preview states */
+.preview-item .loading,
+.preview-item .error {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.preview-item .loading {
+    background: #e3f2fd;
+    color: #1976D2;
+}
+
+.preview-item .error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+#label-graphic {
+    display: none;
+    margin-bottom: 1rem;
+}
+.preview-grid-wrapper:has([data-type="image"]) #label-graphic {
+    display: block;
+}
