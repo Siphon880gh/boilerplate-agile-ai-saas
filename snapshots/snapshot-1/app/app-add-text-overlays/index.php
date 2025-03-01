@@ -23,7 +23,7 @@
     ];
 
     // -> CONFIG HERE:
-    $pageMode['currentMode'] = $pageMode['MODES']['LIVE'];
+    $pageMode['currentMode'] = $pageMode['MODES']['DEMO'];
 
     // Determine $html based on the current mode
     if ($pageMode['currentMode'] === $pageMode['MODES']['LIVE']) {

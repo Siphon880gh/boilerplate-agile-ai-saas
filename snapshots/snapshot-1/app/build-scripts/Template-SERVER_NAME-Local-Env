@@ -1,7 +1,0 @@
-SERVER_TYPE=APP_SERVER_debian_12
-INVITATION_TOKENS=group2024SeptTail,group2025firstlauncher
-GUEST_MODE=1
-SSL_CERT_PATH=/etc/nginx/ssl-certificates/YOUR_DOMAIN.crt
-SSL_KEY_PATH=/etc/nginx/ssl-certificates/YOUR_DOMAIN.key
-MONGO_USER=admin
-MONGO_PASSWORD=YOUR_PASSWORD

@@ -13,8 +13,6 @@ echo <<<cbust_ipad
 cbust_ipad;
 ?>
 
-  <?php $up=1; include("../assets--whitelabeler/brand-loader.php"); unset($up);?>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
   
@@ -32,7 +30,7 @@ cbust_ipad;
   };
 
   // -> CONFIG HERE:      
-  pageMode.currentMode = pageMode.MODES.LIVE;
+  pageMode.currentMode = pageMode.MODES.DEMO;
 
   let submit = () => {}
   if (pageMode.currentMode === pageMode.MODES.LIVE) {

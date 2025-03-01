@@ -19,8 +19,6 @@ echo <<<cbust_ipad
 cbust_ipad;
 ?>
 
-    <?php $up=1; include("../assets--whitelabeler/brand-loader.php"); unset($up);?>
-
     <script class="config-phase">
       const pageMode = {
         MODES: {
@@ -31,7 +29,7 @@ cbust_ipad;
       };
 
       // -> CONFIG HERE:      
-      pageMode.currentMode = pageMode.MODES.LIVE;
+      pageMode.currentMode = pageMode.MODES.DEMO;
 
         // TODO: Refactor into more reactive code
         // Operator:

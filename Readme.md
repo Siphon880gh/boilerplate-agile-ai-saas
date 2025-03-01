@@ -1,12 +1,12 @@
 
-Boilerplate - Agile AI-Powered Full Stack SaaS App
+# Boilerplate - Agile AI-Powered Full Stack SaaS App
 
 ![Last Commit](https://img.shields.io/github/last-commit/Siphon880gh/boilerplate-agile-ai-saas/main)
 <a target="_blank" href="https://github.com/Siphon880gh" rel="nofollow"><img src="https://img.shields.io/badge/GitHub--blue?style=social&logo=GitHub" alt="Github" data-canonical-src="https://img.shields.io/badge/GitHub--blue?style=social&logo=GitHub" style="max-width:8.5ch;"></a>
 <a target="_blank" href="https://www.linkedin.com/in/weng-fung/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-blue?style=flat&logo=linkedin&labelColor=blue" alt="Linked-In" data-canonical-src="https://img.shields.io/badge/LinkedIn-blue?style=flat&amp;logo=linkedin&amp;labelColor=blue" style="max-width:10ch;"></a>
 <a target="_blank" href="https://www.youtube.com/@WayneTeachesCode/" rel="nofollow"><img src="https://img.shields.io/badge/Youtube-red?style=flat&logo=youtube&labelColor=red" alt="Youtube" data-canonical-src="https://img.shields.io/badge/Youtube-red?style=flat&amp;logo=youtube&amp;labelColor=red" style="max-width:10ch;"></a>
 
-A self contained full stack app that can deploy mixed PHP Python server for using AI to create slideshows with your documents (pictures, texts, pdf's, spreadsheets, podcasts, url's, etc). But easy enough for you to remove the spreadsheet creation which is just a placeholder for you to add your own use case.
+A self-contained full stack app that can deploy mixed PHP Python server for using AI to create slideshows with your documents (pictures, texts, pdf's, spreadsheets, podcasts, url's, etc). But easy enough for you to remove the spreadsheet creation which is just a placeholder for you to add your own use case.
 
 The app is broken into multiple snapshots. The first snapshot is focused on developing parts of the apps that can be visited at meeting.html where cofounders discuss the parts of the app.
 
@@ -19,39 +19,93 @@ Fourth snapshot focuses on build scripts to quickly migrate the code online and 
 In summary, this is agile because it's streamlined iteration processes with your team using developed modular components, and then it remains agile because then you combine the demo's into an app with user flow, then integrate user authentication / user management / daabases, and finally we sprinkle consistent environment that's scalable to future user traffic growth. The placeholder boilerplate is capable of connecting to ChatGPT for rewriting user's input, so it's AI assisted. With user memberships and tiers, this is a SaaS boilerplate.
 
 
-## Setup
-
-
 ## Small Demo's with Team (Snapshot 1)
 
-app-read-instructions/
-app-write-prompt/
-app-upload-files/
+This snapshot is focused on developing parts of the apps that can be visited at meeting.html where cofounders discuss the parts of the app over a zoom or conference room projector.
+
+You open meeting.html file and visit each part of the app as the team critiques and suggests the look and features. The features are not connected to each other yet because the best user flow hasn't been decided:
+![image](Readme-assets/snapshot-1-demos.png)
+
+### Demos
+
+For the placeholder app, we have:
 app-add-text-overlays/
 app-preview-slideshow/
+app-read-instructions/
+app-upload-files/
+app-write-prompt/
 
-app-dashboard
-app-profile
-app-auth
-app-edit-case
+Each described here in a possible user flow:
+- **app-read-instructions:** User reads a quick introduction (at read instructions) on how the app works. 
 
-After renaming app.APP_ABBREV.config, grep for app.APP_ABBREV.config and adjust name in the codes that reference that file
-Grep for your newly named “app.APP_ABBREV.config” or the variable `app_config_path`
+- **app-write-prompt:** On another page, the user types instructions to the AI on how to use their files to create the slideshow, if the slideshow is for schooling or business purposes, etc. You would discuss plans of implementing an AI that rewrites the instructions so that the AI slideshow creator can best understand it (Next snapshot).
 
-Remarks about the post size for mp4 and other video files tending to be large in file sizes. The file size is set at upload-files.php and .htaccess and .www.conf (nginx but make sure to adjust server_name or integrate it to your nginx configuration).. At app-upload-files/index.php’s js sections you may want to configure on the frontend the upper limit of file upload selection allowed: `const maxFileSize = 100 * 1024 * 1024; // "A" mb in bytes`
+- **app-upload-files and app-add-text-overlays:** User uploads various documents that the AI will combine into a slideshow. They can be pictures, podcasts, text, pdf, videos, etc. User can label their graphics which the AI can use to create more accurate slideshows (php partial app-add-text-overlays).
 
+- **app-preview-slideshow:** Finally, user waits for the slideshow to get generated. Once it generates, they can watch the video. For demonstration purposes, you can have a placeholder video because the team is critiquing each part of the app at this phase.
 
-root index.php
-<div id="panel-containers" x-data="{ activePanel: SCREENS.AuthForm }" x-init="window.activePanel = activePanel"
-      x-effect="window.activePanel = activePanel" class=" min-h-screen min-w-screen">
-Children elements will have `x-show="activePanel === SCREENS.ReadInstructions"`
+## Best Practice 1: Flag switch demo (modular demo's) versus live (user flow)
 
+Each demo should have a flag to switch between demo and live mode. Live mode is when in snapshot 2, you would have the parts connected in an user flow (so that you can click a "Next" button and another part of the app opens). We'll have them all in demo mode for demonstrating to the agile team:
 
-Adjust your meta tags for SEO and sharing previews - around these lines:
-<meta property="og:title" content="COMPANY_NAME" />
+- **app-add-text-overlays**: This is a PHP partial for one of the other demo's, though you will be demonstrating the PHP partial by itself, therefore the flag is in PHP to impact its layout to be seen individually (without relying on any css of a parent layout):
 
+```
 
-Amend about or demonstrate: Advanced mode → advanced-only
+    <?php
+    /* config-phase */
+    $pageMode = [
+        'MODES' => [
+            'DEMO' => 0,
+            'LIVE' => 1
+        ],
+        'currentMode' => null
+    ];
+
+    // -> CONFIG HERE:
+    $pageMode['currentMode'] = $pageMode['MODES']['LIVE'];
+```
+
+^ The flag would be switching `DEMO` or `LIVE` at `$pageMode['currentMode'] = $pageMode['MODES']['DEMO'];`
+
+- Most other demo's will have a javascript flag, usually reassigning the submit function to either messageSelf (because this is a self contained demo) or messageParent (because Snapshot 2 where you have an user flow will actually be iframe opening iframe's on a parent page):
+
+```
+  <script class="config-phase">
+      const pageMode = {
+        MODES: {
+          DEMO: 0,
+          LIVE: 1,
+        },
+        currentMode: null,
+      };
+
+      // -> CONFIG HERE:
+      pageMode.currentMode = pageMode.MODES.DEMO;
+
+      function messageParent() {
+        window.parent.mainController.proceedFromInstructions();
+      }
+
+      function messageSelf() {
+        alert("DONE. Let's pretend we go to the next page - User will write AI prompt to design the slideshow.")
+      }
+
+      let submit = () => {}
+      if (pageMode.currentMode === pageMode.MODES.LIVE) {
+        submit = messageParent; // No args to pass in
+      } else {
+        submit = messageSelf;
+      }
+  </script>
+```
+
+^ The flag would be switching `DEMO` or `LIVE` at `pageMode.currentMode = pageMode.MODES.DEMO;`
+
+### Best Practice 2: Common CSS
+
+Each demo should link to a common css file (like common.css) that is outside the demo folder. So you can start playing with the company's brand colors and identity on the individual demo's and keep things DRY as the agile team may still be formulating the colors. Then you can adjust the css at one place for all the demo's.
+
 
 ---
 
@@ -75,33 +129,18 @@ Reminds to add to sun modules and how to
 Example user membership collection:
 ```
 
-_id
-67c2b6f7aab1143336ebfd80
-userId
-"67c2b6f7aab1143336ebfd7f"
-appId
-"APP_ABBREV"
-tierLevel
-0
-billId
-0
-billStarted
-0
-billLate
-0
-billNext
-0
-
-creditsAddons
-Array (empty)
-creditsAvailable
-3
-creditsTimesOne
-99
-creditsMonthlyResetNumber
-1
-createdOn
-"2025-02-28 23:27:51"
-trialStarted
-"2025-02-28 23:27:51"
+_id 67c2b6f7aab1143336ebfd80
+userId  "67c2b6f7aab1143336ebfd7f"
+appId   "APP_ABBREV"
+tierLevel   0
+billId  0
+billStarted 0
+billLate    0
+billNext    0
+creditsAddons Array (empty)
+creditsAvailable    3
+creditsTimesOne 99
+creditsMonthlyResetNumber   1
+createdOn   "2025-02-28 23:27:51"
+trialStarted    "2025-02-28 23:27:51"
 ```

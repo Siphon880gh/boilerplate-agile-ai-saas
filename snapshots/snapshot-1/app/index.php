@@ -1,6 +1,5 @@
 <?php
 header("Vary: *");
-include "assets--whitelabeler/brand-loader-by-url.php";
 include "assets/common.php";
 
 require 'vendor/autoload.php';
@@ -55,7 +54,6 @@ echo <<<cbust_ipad
 cbust_ipad;
 ?>
 
-  <?php include("./assets--whitelabeler/brand-loader.php"); ?>
 </head>
 
 <body class="main-background">
