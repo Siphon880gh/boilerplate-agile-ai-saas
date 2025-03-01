@@ -79,7 +79,6 @@ cbust_ipad;
     <div id="panel-containers" x-data="{ activePanel: SCREENS.AuthLanding }" x-init="window.activePanel = activePanel"
       x-effect="window.activePanel = activePanel" class=" min-h-screen min-w-screen">
 
-
       <!-- Panel 1 -->
       <div id="panel-1" x-show="activePanel === SCREENS.ReadInstructions" class="dynamic-panel min-h-screen min-w-screen z-40"
         data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">

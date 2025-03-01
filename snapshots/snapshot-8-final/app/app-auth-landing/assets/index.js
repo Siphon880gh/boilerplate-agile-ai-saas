@@ -28,6 +28,27 @@ if (window.parent.location.href.includes("?login")) {
     }
 }
 
+
+
+function toggleSignupPassword() {
+    if (document.querySelector("#password-signup-confirm").getAttribute("type").toLowerCase() === "password") {
+        document.querySelector("#password-signup").setAttribute("type", "text");
+        document.querySelector("#password-signup-confirm").setAttribute("type", "text");
+    } else {
+        document.querySelector("#password-signup").setAttribute("type", "password");
+        document.querySelector("#password-signup-confirm").setAttribute("type", "password");
+    }
+
+} // toggleSignupPassword
+
+function toggleLoginPassword() {
+    if (document.querySelector("#password-login").getAttribute("type").toLowerCase() === "password") {
+        document.querySelector("#password-login").setAttribute("type", "text");
+    } else {
+        document.querySelector("#password-login").setAttribute("type", "password");
+    }
+} // toggleLoginPassword
+
 function signupNext(btn) {
     if (btn.hasAttribute("disabled") || btn.hasAttribute("data-not-ready"))
         return;

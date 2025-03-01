@@ -37,9 +37,6 @@ cbust_ipad;
   if (pageMode.currentMode === pageMode.MODES.LIVE) {
     submit = messageParent; // No args to pass in
   } else {
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelector(".rewrite-controls").remove();
-    });
     submit = messageSelf;
   }
 
@@ -54,7 +51,6 @@ cbust_ipad;
         aiPrompt: window.getTextareaValue()
       }
 
-      // console.log(payload.propertyDesc)
       window.parent.mainController.saveAIPrompt(payload); // payload includes payload.propertyDesc
   } // messageParent
   </script>
@@ -95,26 +91,6 @@ cbust_ipad;
             placeholder="Enter your text here..."></textarea>
         </div>
 
-        <!-- Controls -->
-        <div class="rewrite-controls flex items-center gap-4 mb-6">
-
-          <button id="rewriteBtn" class="btn btn-brand-primary-2 flex items-center gap-2" style="transition: all 100ms !important;">
-            <i class="fas fa-magic"></i>
-            <i class="fas fa-spinner fa-spin loading-spinner hidden"></i>
-            Rewrite with AI
-          </button>
-
-          <div class="flex gap-2 show-after-rewrite d-none">
-            <button id="undoBtn" class="btn btn-brand-secondary" disabled>
-              <i class="fas fa-undo"></i> Undo
-            </button>
-          </div>
-
-          <div class="ml-auto text-sm text-gray-600">
-            <span id="rewritesLeft">5</span> rewrites remaining
-          </div>
-        </div>
-
         <!-- Navigation -->
         <div class="flex justify-between mt-8 border-t-2-offborder-gray-300">
           <button id="submit" class="btn-brand-primary disabled" style="margin:20px auto"
@@ -133,6 +109,9 @@ echo <<<cbust_ipad
 
 cbust_ipad;
 ?>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
 </body>
 </html>

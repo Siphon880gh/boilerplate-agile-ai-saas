@@ -15,7 +15,6 @@
 echo <<<cbust_ipad
     <link rel="stylesheet" href="assets/index.css$v">
     <link rel="stylesheet" href="../assets/common.css$v">
-    <script src="../assets/screens.js$v"></script>
 cbust_ipad;
 ?>
 

@@ -48,13 +48,6 @@ if(isset($_SESSION['co'])) {
 
         include("$prefix./assets--whitelabeler/branding-partner1/common-partner1.php");
 
-        $_SESSION['partial-auth-landing'] = "";
-        ob_start();
-        $logo = "../assets--whitelabeler/branding-partner1/logo-partner1.png";
-        include 'branding-partner1/partial-auth-landing.php';
-        $htmlContent = ob_get_clean();
-        $_SESSION['partial-auth-landing'] = $htmlContent;
-
     } else {
         $isDefaultBrand = true;
     }    
@@ -68,12 +61,4 @@ if($isDefaultBrand) {
     echo "<script src='$prefix./assets--whitelabeler/branding-default/common-default.js'></script>";
 
     include("$prefix./assets--whitelabeler/branding-default/common-default.php");
-
-    $_SESSION['partial-auth-landing'] = "";
-    ob_start();
-    $logo = "../assets--whitelabeler/branding-default/logo-default.png";
-    include 'branding-default/partial-auth-landing.php';
-    $htmlContent = ob_get_clean();
-    $_SESSION['partial-auth-landing'] = $htmlContent;
-
 }

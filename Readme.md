@@ -142,14 +142,18 @@ This boilerplate includes the menu and modal window system we just talked about 
 
 The menu item "Walkthrough" opens a modal that plays the video at assets/videos/demo-walkthrough.mp4 which is a placeholder video.
 
-### Alpine JS Iframes
+### Alpine JS Iframes and Unified Model
 
 With a root index.php that has modals and all the demo's, you have several choices: 
 - Can paste all the demo's codes into the app and have the demo's dynamically hide/unhide. This is too much work especially when your team may still be showing the individual demo as you're building the user flow in the app.
 - Have an iframe that navigates to another page. This iframe will navigate through all the pages. This is a candidate.
 - Have multiple iframes, each iframe to each demo. The iframe could be blank until it's time to render when the user reaches that point of the app, or it could be pre-rendered ahead of time. The disadvantage is slow internet connections could suffer and the complexity of the code. The advantage is that you can appear to render the page quickly (by unhiding) and you could have access to user entry from previous iframe's. Regardless of having access to previous iframes, we will still have a data model so we can have a point of truth for saving to database or displaying previous information into the DOM.
 
+We choose the multiple iframes, each iframe loading a module, for this boilerplate.
+
 As for MVC, we have a model called `appModel` at root assets/index.js. In addition, we have a `navController` which can control behaviors of user clicking back/forth and switching to iframes (behaviors such as reloading the iframe or simply unhiding a preloaded iframe). 
+
+To see the unified model in action, you can visit the app, then go through entering slideshow instructions and press "Continue" to go to the page where you upload files. Open DevTools console and run `window.parent.appModel.aiPrompt`. You'll see the typed prompt has been saved to this global object outside of the Iframes, and therefore any Iframe has access to it via `window.parent...`.
 
 As for each module, it no longer self messages but messages the parent (parent index.js whereas each module is inside an iframe). Some iframes will load when it's their turn and some may be loaded ahead of time before being visible by alpine js. Make sure to flip the switch to `LIVE`:
 ```
@@ -190,7 +194,9 @@ You set which Alpine JS iframe is the first to appear on the page when user visi
 
 In the future, if you have to insert new pages inbetween, you can have them as IDs 10X, for example, 101 between 1 and 2, then eventually reorder them to be 1, 2 (the new one), 3 and make sure updating assets/screens.js constants to reflect that. If you’re adding pages before page 1 (like 3 additional pages), you can use -1, -2, -3
 
-Because we now are making a full frontend app, you may want to offer different combinations of colors, fonts, button styles, etc to the team. Therefore, we created a whitelabeling system that allows switching style assets and settings depending on the "company", but for the purposes of snapshot 2 where your app is not online yet, it's experimenting with different color combinations. Looking at `assets--whitelabeler/` you'll see there are different sets of css files for default and partner1. At each demo, which we can call module this point onwards, the code refers to a brand-loader.php to determine whether to load the default or partner1. And at index.php which frames the entire app, you see in the code a brand-loader-by-url.php which looks for a ?co=default or ?co=partner1 in the url to override which brand colors to load in. There are js and php files whihc are simply variables to the name of the company, colors, logo paths, etc that are needed to complete the styling.
+#### Brand Combo Switching in Lieu of Whitelabeling
+
+Because we now are making a full frontend app, you may want to offer different combinations of colors, fonts, button styles, etc to the team. Therefore, we created a whitelabeling system that allows switching style assets and settings depending on the "company", but for the purposes of snapshot 2 where your app is not online yet, it's experimenting with different color combinations. Looking at `assets--whitelabeler/` you'll see there are different sets of css files for default and partner1. At each demo, which we can call module this point onwards, the code refers to a brand-loader.php to determine whether to load the default or partner1. And at index.php which frames the entire app, you see in the code a brand-loader.php as well because there are visual elements on the rest of the app around the iframe. That index.php ALSO has code referencing brand-loader-by-url.php which looks for a ?co=default or ?co=partner1 in the url to override which brand colors to load in (say you send a custom url to a stakeholder to see how certain color combinations look). There are js and php files whihc are simply variables to the name of the company, colors, logo paths, etc that are needed to complete the styling.
 
 ### Breadcrumb steps
 

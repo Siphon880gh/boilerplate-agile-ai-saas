@@ -765,7 +765,6 @@ var navController = {
       this.lastVisited.push(sessionTimestamp);
     }
     this.lastVisited.push(panelNum);
-    this.reportLastVisitedDb();
 
     // if(panelNum===4)
     //   debugger;      
@@ -818,22 +817,6 @@ var navController = {
     const panelNum = navController.getPanel();
     const iframeElement = document.querySelector(`#panel-${panelNum} iframe`);
 
-    if (!isAdvancedMode) {
-      if (iframeElement) {
-        const advancedOnlyEls = iframeElement.contentWindow.document.querySelectorAll('.advanced-only');
-        advancedOnlyEls.forEach(element => {
-          element.remove()
-        });
-      }
-    } else {
-      if (iframeElement) {
-        const advancedOnlyEls = iframeElement.contentWindow.document.querySelectorAll('.advanced-only');
-        advancedOnlyEls.forEach(element => {
-          element.classList.remove("advanced-only");
-          element.classList.add("advanced-okay");
-        });
-      }
-    }
   },
   // resetUploadIframe() {
   //   // Assure if going to upload page by progressing forward, the upload page will refresh
@@ -844,75 +827,6 @@ var navController = {
   // }
 } // navController
 
-// Upgrade navController to have analytics
-Object.assign(navController, {
-  reportLastVisitedDb: function () { // window.parent.mainController._reportLastVisited();
-    // var returningReport = "";
-
-    function getEnumName(value) {
-      for (const [key, val] of Object.entries(SCREENS)) {
-        if (val === value) {
-          return key; // `SCREENS.${key}`;
-        }
-      }
-      return value; // if not matched, return the raw value
-    } // getEnumName
-
-    let reportingNames = [];
-    this.lastVisited.forEach(index => {
-      const name = getEnumName(index);
-      reportingNames.push(name);
-    });
-
-    var payload = {
-      userId: window.parent.getUserId(),
-      newVisit: reportingNames.join(",")
-    }
-
-    fetch(finalHost + "/analytics/webpages/visited", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    }).then(response => response.json())
-      .then(resource => {
-        if (resource.error === 1) {
-          console.error(resource)
-
-        }
-        console.log(resource)
-      }) // fetch
-
-  }, // reportLastVisitedDb
-  reportLastVisitedStrings: function () { // window.parent.mainController._reportLastVisited();
-    var returningReport = "";
-
-    function getEnumName(value) {
-      for (const [key, val] of Object.entries(SCREENS)) {
-        if (val === value) {
-          return key; // `SCREENS.${key}`;
-        }
-      }
-      return value; // if not matched, return the raw value
-    } // getEnumName
-
-    returningReport += "Last visited screen enum ints: " + JSON.stringify(this.lastVisited) + "\n";
-
-    let reportingNames = [];
-    this.lastVisited.forEach(index => {
-      const name = getEnumName(index);
-      reportingNames.push(name);
-    });
-    returningReport += "Last visited screen enum names: " + JSON.stringify(reportingNames) + "\n";
-
-    returningReport.split("\n").forEach(reportLine => { console.log(reportLine) });
-    return returningReport;
-  },
-  getLastRevisitedRaw: function () {
-    return this.lastVisited; // Eg. [-1,1,2] <-- 2 is the most recently visited via switchPanel function
-  }
-});
 
 
 const { setQueryWithoutTriggeringPopstate, getPanel, switchPanel, resetUploadIframe } = navController.init();
@@ -920,27 +834,6 @@ window.setQueryWithoutTriggeringPopstate = setQueryWithoutTriggeringPopstate;
 window.getPanel = getPanel;
 window.switchPanel = switchPanel;
 window.resetUploadIframe = resetUploadIframe;
-
-
-function toggleSignupPassword() {
-  if (document.querySelector("#password-signup-confirm").getAttribute("type").toLowerCase() === "password") {
-    document.querySelector("#password-signup").setAttribute("type", "text");
-    document.querySelector("#password-signup-confirm").setAttribute("type", "text");
-  } else {
-    document.querySelector("#password-signup").setAttribute("type", "password");
-    document.querySelector("#password-signup-confirm").setAttribute("type", "password");
-  }
-
-} // toggleSignupPassword
-
-function toggleLoginPassword() {
-  if (document.querySelector("#password-login").getAttribute("type").toLowerCase() === "password") {
-    document.querySelector("#password-login").setAttribute("type", "text");
-  } else {
-    document.querySelector("#password-login").setAttribute("type", "password");
-  }
-
-} // toggleLoginPassword
 
 /**
  * Walkthrough Modal

@@ -2,16 +2,6 @@
 header("Vary: *");
 include "assets--whitelabeler/brand-loader-by-url.php";
 include "assets/common.php";
-
-require 'vendor/autoload.php';
-use Dotenv\Dotenv;
-
-// Load the .env file
-$dotenv = Dotenv::createImmutable(__DIR__, ".env.local");
-$dotenv->load();
-
-$env_guest_mode = (int) ($_ENV['GUEST_MODE'] ?? 0);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +38,6 @@ $env_guest_mode = (int) ($_ENV['GUEST_MODE'] ?? 0);
 <?php include("./assets/version-cache-bust.php");
 echo <<<cbust_ipad
 
-  <script src="assets/jwt-paint-before.js$v"></script>
   <link href="assets/index.css$v" rel="stylesheet">
   <link href="assets/common.css$v" rel="stylesheet">
 
@@ -79,7 +68,6 @@ cbust_ipad;
     <div id="panel-containers" x-data="{ activePanel: SCREENS.ReadInstructions }" x-init="window.activePanel = activePanel"
       x-effect="window.activePanel = activePanel" class=" min-h-screen min-w-screen">
 
-
       <!-- Panel 1 -->
       <div id="panel-1" x-show="activePanel === SCREENS.ReadInstructions" class="dynamic-panel min-h-screen min-w-screen z-40"
         data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
@@ -105,32 +93,6 @@ cbust_ipad;
         <iframe id="iframe-preview-slideshow" src="about:blank" data-will-src="app-preview-slideshow/" class="min-h-screen min-w-screen" frameborder="0" width="100%" height="100%"></iframe>
       </div>
 
-      <!-- Panel Edit Case -->
-      <div id="panel-11" x-show="activePanel === SCREENS.EditCase" class="dynamic-panel min-h-screen min-w-screen z-40" style="display: none;">
-        <iframe id="iframe-edit-case" src="about:blank" data-will-src="app-edit-case/" class="min-h-screen min-w-screen" frameborder="0" width="100%" height="100%"></iframe>
-      </div>
-
-
-      <!-- Panel Edit Profile -->
-      <div id="panel-12" x-show="activePanel === SCREENS.EditProfile;" class="dynamic-panel min-h-screen min-w-screen"
-        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
-        <iframe src="about:blank" data-will-src="app-profile/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
-          height="100%"></iframe>
-      </div>
-
-      <!-- Panel Auth Form -->
-      <div id="panel-13" x-show="activePanel === SCREENS.AuthLanding;" class="dynamic-panel min-h-screen min-w-screen"
-        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
-        <iframe src="app-auth-landing/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
-          height="100%"></iframe>
-      </div>
-
-      <!-- Panel Dashboard-->
-      <div id="panel-14" x-show="activePanel === SCREENS.Dashboard;" class="dynamic-panel min-h-screen min-w-screen"
-        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
-        <iframe src="about:blank" data-will-src="app-dashboard/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
-          height="100%"></iframe>
-      </div>
 
     </div> <!-- panel-containers -->
   </div> <!-- center page -->
@@ -163,8 +125,6 @@ echo <<<cbust_ipad
   <script src="assets/screens.js$v"></script>
   <script src="assets/utils.js$v"></script>
   <script src="assets/index.js$v"></script>
-
-  <script src="assets/jwt-paint-after.js$v"></script>
 cbust_ipad;
 ?>
 

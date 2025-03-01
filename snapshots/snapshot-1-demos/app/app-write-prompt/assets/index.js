@@ -38,8 +38,6 @@ const textEditor = {
     checkHasTypedPollerId: -1,
     textarea: null,
     rewriteBtn: null,
-    undoBtn: null,
-    rewritesLeftEl: null,
     toast: null,
     btnSubmit: null,
 
@@ -48,30 +46,11 @@ const textEditor = {
     rewritesLeft: 5,
     rewrittenYet: false,
 
-    onFirstRewrite() {
-        document.querySelector(".show-after-rewrite").classList.remove("d-none");
-    },
-
     init() {
         this.textarea = document.getElementById('textarea');
-        this.rewriteBtn = document.getElementById('rewriteBtn');
-        this.undoBtn = document.getElementById('undoBtn');
-        this.rewritesLeftEl = document.getElementById('rewritesLeft');
-        this.toast = document.getElementById('toast');
         this.btnSubmit = document.getElementById("submit");
 
-        this.history = [];
-        this.currentIndex = -1;
-        this.rewritesLeft = 5;
-
-        this.setupEventListeners();
-
         this.initCheckCharInputted();
-
-        if(window.parent.resumingModelAIPrompt) {
-            this.textarea.value = window.parent.resumingModelAIPrompt;
-            this.updateUIRewriteCount();
-        }
 
         return {
             cleanupCheckCharInputted:this.cleanupCheckCharInputted,
@@ -120,13 +99,13 @@ const textEditor = {
     finalCheck() {
         var passed = true;
         if (this.textarea.value.length === 0) {
-            animateUnable(propertyDesc);
-            alert('Please enter your property description.');
+            animateUnable(this.textarea);
+            alert('Please enter your text.');
             passed = false;
         }
         if (this.textarea.value.length >= CHAR_LIMIT) {
-            animateUnable(propertyDesc);
-            alert('Too many characters. Please shorten your description.');
+            animateUnable(this.textarea);
+            alert('Too many characters. Please shorten your text.');
             passed = false;
         }
         return passed;
@@ -136,119 +115,6 @@ const textEditor = {
     getTextareaValue() {
         return this.textarea.value;
     },
-
-    setupEventListeners() {
-        this.rewriteBtn.addEventListener('click', () => this.handleRewrite());
-        this.undoBtn.addEventListener('click', () => this.undo());
-    },
-
-    async handleRewrite() {
-        if (this.rewritesLeft <= 0) return;
-
-        const currentText = this.textarea.value;
-        if (!currentText.trim()) return;
-
-        this.rewriteBtn.disabled = true;
-        this.rewriteBtn.classList.add("disabled");
-        this.showLoadingSpinner();
-
-        try {
-            const rewrittenText = await this.getAIRewrite(currentText);
-            if (rewrittenText.includes("ERROR")) {
-                alert("ERROR: ...");
-                return;
-            }
-
-            if (!this.rewrittenYet) {
-                this.rewrittenYet = true;
-                this.onFirstRewrite();
-            }
-            this.textarea.value = rewrittenText;
-            this.rewritesLeft--;
-            this.updateUIRewriteCount();
-            this.showToast();
-        } catch (error) {
-            console.error('Error during rewrite:', error);
-        } finally {
-            this.hideLoadingSpinner();
-            this.rewriteBtn.disabled = false;
-            this.rewriteBtn.classList.remove("disabled");
-        }
-    },
-
-    async getAIRewrite(text) {
-        try {
-            const userId = window.parent.getUserId();
-            const appId = window.parent.getAppId();
-            const caseId = window.parent.getCaseId();
-            const response = await fetch(finalHost + "/media/interim/prompt/rewrite", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, userId, appId, caseId })
-            });
-
-            const data = await response.json();
-
-            this.addToHistory(text);
-
-            return data.rewrittenText;
-
-        } catch (error) {
-            const errorMessage = "Error rewriting with AI: " + error;
-            console.error(errorMessage);
-            alert(errorMessage);
-            return text;
-        }
-    },
-
-    addToHistory(text) {
-        this.history = this.history.slice(0, this.currentIndex + 1);
-        this.history.push(text);
-        this.currentIndex = this.history.length;
-        this.updateUIHistoryButtons();
-    },
-
-    undo() {
-        if (this.currentIndex > 0) {
-            this.currentIndex--;
-            this.textarea.value = this.history[this.currentIndex];
-            this.updateUIHistoryButtons();
-        }
-    },
-
-    updateUIHistoryButtons() {
-        this.undoBtn.disabled = this.currentIndex <= 0;
-    },
-
-    updateUIRewriteCount() {
-        this.rewritesLeftEl.textContent = this.rewritesLeft;
-        this.rewriteBtn.disabled = this.rewritesLeft <= 0;
-    },
-
-    showLoadingSpinner() {
-        const spinner = this.rewriteBtn.querySelector('.loading-spinner');
-        const wand = this.rewriteBtn.querySelector('.fa-magic');
-        spinner.classList.remove('hidden');
-        wand.classList.add('hidden');
-    },
-
-    hideLoadingSpinner() {
-        const spinner = this.rewriteBtn.querySelector('.loading-spinner');
-        const wand = this.rewriteBtn.querySelector('.fa-magic');
-        spinner.classList.add('hidden');
-        wand.classList.remove('hidden');
-    },
-
-    showToast() {
-        window.parent.document.querySelector('#bottom-left').innerHTML = `
-            <div class="p-4 rounded-lg transition-opacity duration-300 bgcolor-brand-contrasted textcolor-brand">
-                Description updated successfully!
-            </div>
-        `;
-        setTimeout(() => {
-            window.parent.document.querySelector('#bottom-left').innerHTML = '';
-        }, 2000);
-    }
 };
 
 // Initialize the editor when the page loads
