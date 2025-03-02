@@ -862,7 +862,7 @@ These worker processes and multithreading options are passed while gunicorn comm
 - infrastructure/supervisor-app-runs/supervisor_SERVER_NAME_api.sh
 - infrastructure/supervisor-app-runs/supervisor_SERVER_NAME_video.sh
 
-^ And those sh commands will take care of starting in the pyenv environment (for specific python version) and running pipenv packages in an already existing virtual env. FYI, without pyenv, pipenv virtual env is ran with `pyenv shell`, but with pyenv virtual env already in the shell, then you can override the packages with pipenv's by running `pipenv run <pyenv_ve_name>`.
+^ And those sh commands will take care of starting in the pyenv environment (for specific python version) and running pipenv packages in an already existing virtual env. FYI, without pyenv, pipenv virtual env is ran with `pyenv shell`, but with pyenv's virtual env already in the shell, then you can override pyenv's packages with pipenv's by running `pipenv run <command>` which executes the commands using the Pipenv's virtual environment tied to the Pipfile WITHOUT changing the shell's virtual environment or session.
 
 Gunicorn also can handle https connections, which you have to keep consistent (because frontend will be https making requests to port 5001 using https). SSL certs etc are defined an .env.local because it's specific to your server, and both .sh files do parse for the .env.local file and pass the SSL paths to gunicorn command:
 ```
@@ -900,7 +900,7 @@ Refer to my full tutorial on Supervisor at:
 
 ### Alternates
 
-If you were running NodeJS servers instead of python servers for your app case, you would use `nvm` instead of `gunicorn`. With nvm, you can have an`ecosystem.config.js` where you prioritize concurrency or cpu use. So the settings and marked down rather than passed as part of a shell command.
+If you were running NodeJS server processes instead of Python server processes for your app case, you would use `nvm` instead of `gunicorn`. With nvm, you can have an`ecosystem.config.js` where you prioritize concurrency or cpu use. So the settings are marked up rather than passed into a command.
 
 If your server is not old, you can use Docker / Docker Compose / Kubernetes. You can also use AWS which is more reasonable if you will have a lot more traffic.
 
