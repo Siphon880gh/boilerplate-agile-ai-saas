@@ -315,6 +315,8 @@ We will add user ability which also means adding a database and actually impleme
 
 3. You also want to run `npm install`. NodeJS will not be used for our app’s actual code but will help with running the two python flask services api service and video engine simultaneously using the `concurrent` package. There’s no actual communication of Nodejs to the python files - the npm is just being used to run shell commands of running the python flask servers.
 
+### Configurations
+
 As a foreword: You can setup the Mongo database by running the seed.py, which uses the utils/server/db.py as a unified point of truth to authenticate Mongo. The db.py refer to optional credentials in env.local (or leave empty for env vars if your local development has a Mongo that's not password protected). The db.py also referes to the database name in app.APP_ABBREV.config.json. That config file also has the app abbreviation that is used to name user assets (Like - it’ll be part of the file naming system that is file-<INDEX>-a<APP_ABBREV>-c<CASE_ID>-<USER_ID>.fileextension) and to tag the field APP_ID in many Mongo documents, allowing the same engine (like slideshow engine) to be used across multiple apps by having different app id's or app abbreviations.
 
 If adopting the app to your use case, you would rename app.APP_ABBREV.config.json. Let's say your app's name is Pineapple, then you could rename it app.pappl.config.json or app.pineapple.config.json. You would update the database name and app abbreviation inside the config file. Then you would update references to that file's filename at (you could grep for them):
@@ -327,7 +329,7 @@ If simply testing out the boilerplate's snapshot, leave everything as is (don't 
 
 Refer to the sample env files at .env.sample and .env.local.sample, which are for protected secrets across different systems (OpenAI Secret keys, Jsonwebtoken, etc.), and protected secrets at the current system (Mongo authentication if applicable, internal api call url's, etc), respectively. In other words, the env would be for API keys etc that’s not related to your the current server or computer system the code is running at, but the env.local is for the Mongo credentials because it relates to the Mongo server on the current system. Create your own .env and .env.local out of those sample files. Update the following:
 - OPENAI_API_KEY because we will enhance slideshow instructions to have AI assist user to write the slideshow instructions.
-- JWT_SECRET come up with a random series of numbers and letters to make user's logged in sessions harder to hack by bad actors.
+- JWT_SECRET come up with a random series of numbers and letters to make user's logged in sessions harder to hack by bad actors. JWT will be covered more later.
 - MongoDB credentials at .env.local are optional. If you're developing locally with an unprotected Mongo server that doesn't have authentication, you can omit.
 
 In a future snapshot, we will have build scripts that will replace the .env.local based on whether it’s your computer copy or a remote copy.
@@ -355,5 +357,90 @@ dotenv_path_local = os.path.join(os.path.dirname(__file__), '..', '..', '.env.lo
 load_dotenv(override=True, dotenv_path=dotenv_path)
 load_dotenv(override=True, dotenv_path=dotenv_path_local)
 ```
+
+### Seed Mongo
+
+Run `python seed.py` to seed your Mongo database. You will notice a lot of documents with these fields `userId: "err", appId: "APP_ID", caseId: 1,`
+The idea is that there are users under your app, which may use the same slideshow engine as other apps, and therefore you have user id's and app id's. The case id's represent the slideshow that the user creates. If adopting to your case, it could represent a song the user is creating or a video the user is creating.
+
+Example user collection:
+```
+{
+  "_id": "67c2b6f7aab1143336ebfd7f",
+  "login": "...",
+  "password": "...",
+  "appId": "APP_ABBREV",
+  "full_name": "Weng",
+  "newsletter": "n",
+  "createdOn": "2025-02-28 23:27:51",
+  "jwt": "eyJhbGciOiAiSFMyNTYiLCA....,
+  "analytics_page_visits": {
+    "2025-02-28 23:52:10": "Dashboard,Dashboard,AuthLanding",
+    "2025-03-01 03:23:38": "Dashboard,ReadInstructions"
+  }
+}
+```
+
+
+Example user membership collection:
+```
+{
+  "_id": "67c2b6f7aab1143336ebfd80",
+  "userId": "67c2b6f7aab1143336ebfd7f",
+  "appId": "APP_ABBREV",
+  "tierLevel": 0,
+  "billId": 0,
+  "billStarted": 0,
+  "billLate": 0,
+  "billNext": 0,
+  "creditsAddons": Array (empty),
+  "creditsAvailable": 3,
+  "creditsTimesOne": 99,
+  "creditsMonthlyResetNumber": 1,
+  "createdOn": "2025-02-28 23:27:51",
+  "trialStarted": "2025-02-28 23:27:51"
+}
+```
+
+content:
+```
+{
+  "_id": "67c2b7d2aab1143336ebfd81",
+  "userId": "67c2b6f7aab1143336ebfd7f",
+  "appId": "APP_ABBREV",
+  "caseId": 1,
+  "content_is": {
+    "aiPrompt": "First, you'll tell the AI what kind of slideshow you'd like. Then, you can upload any files you want to include—pictures, text, audio, and more.\n\nOnce that's done, the AI will generate the complete slideshow for you.\n\n",
+    "files": [
+      {
+        "path": "../users/file-0-aAPP_ABBREV-1-67c2b6f7aab1143336ebfd7f.jpg",
+        "index": 0,
+        "isUrl": false
+      }
+    ],
+    "labels": {},
+    "finalVideo": "users/final-video-aAPP_ABBREV-c1-67c2b6f7aab1143336ebfd7f.mp4",
+    "created": "2025-02-28 23:31:50"
+  },
+  "jobId": "67c2b7e144937e534c9ed902"
+}
+```
+
+job:
+```
+{
+  "_id": {
+    "$oid": "67c2b7e144937e534c9ed902"
+  },
+  "appId": "APP_ABBREV",
+  "caseId": 1,
+  "userId": "67c2b6f7aab1143336ebfd7f",
+  "data": {}
+}
+```
+
+Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
+
+### Login/Signup
 
 **TO BE CONTINUED... WIP since 3/1/25**
