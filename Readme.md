@@ -936,3 +936,8 @@ You may choose to have a huge mono-repo of the entire app or one repo with neste
  - ..
 
 By having submodules, it wont complain about git conflicts with having a git inside a git. As another advantage, the slideshow-engine or any “engine” that you develop may be decoupled from the rest of your app as a whole other repo, allowing your other product line apps to use the same engine.
+
+
+----
+
+## End.
