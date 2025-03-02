@@ -450,7 +450,7 @@ Jobs is basically a queing system that keep track of inputs that are very large 
 
 We want a place for users to login or signup if not logged in (Auth landing page). And if they’re logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
 
-app-auth-landing/:
+app-auth-landing/ (renders with a PHP partial housed at assets--whitelabeler):
 ![image](Readme-assets/snapshot-3-a-auth-landing.png)
 
 app-dashboard/:
@@ -458,6 +458,7 @@ app-dashboard/:
 
 <center>
 And going to edit a finished slideshow:
+
 <img src="Readme-assets/snapshot-3-c-edit.png" style="width:200px; height:365px;"></img>
 </center>
 
@@ -509,18 +510,20 @@ cbust_ipad;
 
 With user signup and login ability, we’ve added an `authController` at root `app/index.js` to communicate with the app and the backend at `microservices/api_service.py`. 
 
-Note forgot password is not implemented. At modals.php, we’ve added a placeholder the tech support email address:
-```
-<a href="javascript:void(0)" class="text-gray-600 no-underline" onclick="alert('Please contact EMAIL_HERE')">Forgot password</a>
-```
-
 #### Login/Signup Module Partials
 
-The auth landing page could have several styles and company logos because it's the first page that the user sees when going to the app and isn't logged in. For this reason, auth-landing-page/ is actually an Alpine JS Iframe module that has PHP partial at the whitelabeling system:
+The auth landing page is the first page that the user sees when going to the app and isn't logged in. This page usually has the company logo and we have a white labeling system which had been used for testing brand color combinations. This is a good place to hook in different auth landing pages with different company logos for future whitelabeled partners/clients.
+
+For these reason, auth-landing-page/ is actually an Alpine JS Iframe module that has PHP partial at the whitelabeling system:
 - assets--whitelabeler/branding-default/partial-auth-landing.php
 - assets--whitelabeler/branding-partner1/partial-auth-landing.php
 
 ^ The brand-loader.php as discussed in a previous section decides the appropriate assets to load for the desired brand color combination or whitelabeled company. We've enhanced brand-loader.php to store the appropriate partial HTML: `$_SESSION['partial-auth-landing'] = $html`.
+
+The partial-auth-landing.php is important because it’s the first page non-logged in users sees when going to the app. For white labeled partners and clients, you may want to plug in your company name at the white labeled portal, for example, into `branding-partner1/partial-auth-landing.php`:
+<span class="text-sm">Powered by <a target="_blank" href="#">DEFAULT_BRAND</a></span> 
+^ You may want to put a small logo of your company that opens to your website at around there too
+And you can customize that partial with whatever HTML, so it’s quite flexible.
 
 #### Login/Signup JsonWebToken
 
@@ -549,6 +552,15 @@ var navController = {
 
 As this is a boilerplate, if you want to finish implementing the json web token, instead of only checking if a JWT exsists in the localStorage, you'd also send a request to `api_service.py` to check if the JWT is valid using the secret from the .env. In addition, you would implement JWT validation for each time `switchPanel` advances to another page.
 
+### Login/Signup Misc - Forgot Password, Legal
+
+
+Note forgot password is not implemented. At modals.php, we’ve added a placeholder the tech support email address:
+```
+<a href="javascript:void(0)" class="text-gray-600 no-underline" onclick="alert('Please contact EMAIL_HERE')">Forgot password</a>
+```
+
+Because user can now access login and signup modals, this is a good time to delegate to your legal team or another agile member to draft a Terms and services to email you. Then you can link to it on the signup/login modal.
 
 ### More Modules
 
@@ -585,7 +597,137 @@ Then the rest of the Alpine JS Iframes at root index.php:
 
 #### Editing Profile
 
+Because there’s an user, we can allow them to turn on newsletter or delete their profile (absolutely required in Europe now). So we added an Edit Profile feature (see it in action at the menu). And in case your app’s need requires profile pic and user name, we’ve implemented profile pic upload with cropping and user name to Edit Profile. The uploaded profile pic is placed in users/ folder as with all user uploaded content, and named formulaically.
 
 
+![screenshot](Readme-assets/snapshot-3-d-edit-profile.png)
 
-**TO BE CONTINUED... WIP since 3/1/25**
+At the profile, we also added advanced mode. Enabling advanced mode will allow you to add URLs along with files at the files upload page. To make this possible, both switchPanel and the popstate handling at navController checks the advanced mode then remove or show the advanced feature (URL adding at upload files in this case) accordingly. We will cover more changes to upload pages at a later readme section for this snapshot.
+
+Basic Mode:
+![screenshot](Readme-assets/snapshot-3-e-upload-basic.png)
+
+Advanced Mode:
+![screenshot](Readme-assets/snapshot-3-f-upload-advanced.png)
+
+
+For any features in any Alpine JS iframe modules that you want advanced mode only, you wrap in a class “advanced-only”, because the code at navController that controls the rendering of advanced features are:
+```
+    if (!isAdvancedMode) {
+      if (iframeElement) {
+        const advancedOnlyEls = iframeElement.contentWindow.document.querySelectorAll('.advanced-only');
+        advancedOnlyEls.forEach(element => {
+          element.remove()
+        });
+      }
+    } else {
+      if (iframeElement) {
+        const advancedOnlyEls = iframeElement.contentWindow.document.querySelectorAll('.advanced-only');
+        advancedOnlyEls.forEach(element => {
+          element.classList.remove("advanced-only");
+          element.classList.add("advanced-okay");
+        });
+      }
+    }
+  },
+```
+
+#### AI-Assisted Writing
+
+With users, we can choose to offer free AI writing assistance to all users or only users with certain addons on the Mongo collection user_memberships. Here the app-write-prompt gets AI assistance feature to help user rewrite their slideshow instructions:
+
+```
+  <!-- Controls -->
+  <div class="rewrite-controls flex items-center gap-4 mb-6">
+
+    <button id="rewriteBtn" class="btn btn-brand-primary-2 flex items-center gap-2" style="transition: all 100ms !important;">
+      <i class="fas fa-magic"></i>
+      <i class="fas fa-spinner fa-spin loading-spinner hidden"></i>
+      Rewrite with AI
+    </button>
+
+    <div class="flex gap-2 show-after-rewrite d-none">
+      <button id="undoBtn" class="btn btn-brand-secondary" disabled>
+        <i class="fas fa-undo"></i> Undo
+      </button>
+    </div>
+
+    <div class="ml-auto text-sm text-gray-600">
+      <span id="rewritesLeft">5</span> rewrites remaining
+    </div>
+  </div>
+```
+
+
+AI rewrite feature is at service/openai_rewrite.py. Adjust the prompt (at services/openai_rewrite.py:request_body) and adjust your api key (api key at .env as OPENAI_API_KEY )
+Not providing an openai api key will break the server from running: if you do not want to demonstrate AI rewrite because your app won’t have it, then at the bare minimum, remove if not api_key  and the next line raise ValueError ... at service/openai_rewrite.py, and more correctly, you remove openai_rewrite.py file, its usage at api_service.py and its usage at app-write-prompt
+
+For editing a completed slideshow from dashboard, app-edit-case will save a resumingModel then redirect to app-write-prompt, which checks for any existing resumingModel, then renders it if does exist
+```
+        if(window.parent.resumingModelAIPrompt) {
+            this.textarea.value = window.parent.resumingModelAIPrompt;
+        }
+```
+
+#### Upload Files
+
+app-upload-files actually implemented to upload files named after the users, since we now have users and implemented a database
+
+Files will be uploaded to users/ naming based on the filename format discussed before.
+
+The post size for mp4 and other video files tending to be large in file sizes. The file size is set at upload-files.php and .htaccess and .www.conf (nginx but make sure to adjust server_name or integrate it to your nginx configuration).. At app-upload-files/index.php’s js sections you may want to configure on the frontend the upper limit of file upload selection allowed: `const maxFileSize = 100 * 1024 * 1024; // "A" mb in bytes`. Note the htaccess and .www.conf for apache and nginx, respectively. Apache will work as is with the htaccess there, but .www.conf will need to be copied elsewhere for nginx to apply the settings.
+
+#### Slideshow creation
+
+This is a boilerplate, so we don’t actually implement taking the user’s instructions and files to create a slideshow using AI. However, it’s AI assisted at where the user enters their instructions to create the slideshow with the files. To mimic creating a slideshow, the slideshow-engine/ creates a 5 second delay, then copies slideshow-engine/demo/demo.mp4 to users/ photo and named it formulaically.
+
+Note that slideshow-engine is decoupled from the database which is best practice. So when the api call cranks up the slideshow-engine, it’s passed the variable name from the scope of the slideshow-engine, and the python module that will report to Mongo database:
+
+```
+         process_args = {
+            "filenameAttachIds":f"a{appId}-c{caseId}-{userId}",
+            "files": [os.path.join(app_dir, item.get('url', '')) for item in content_is.get("files", [])],
+            "callbacks": [
+                {
+                    "dynamic_module_path": "../",
+                    "dynamic_module_name": "utils.slideshow_callbacks.report_from_slideshow",
+                    "method_name": "update_mongo",
+                    "inputs": [
+                        appId,
+                        caseId,
+                        userId
+                    ],
+                    "inputVars": [
+                        "FINAL_VIDEO"
+                    ]
+                }
+            ],
+            "app_dir": app_dir
+        } # a with values
+```
+
+^ Note the paths of the uploaded files are also passed to the slideshow-engine because the slideshow-engine cannot access the database for the filepaths, by design of decoupling.
+
+#### Web Analytics
+
+Since we have users, we can add analytics to navController because the analytics need to be hooked to user visiting pages by navigating back/forth or clicking links on the page, so at root assets/index.js, we augment navController with an object merging:
+```
+// Upgrade navController to have analytics
+Object.assign(navController, {
+  reportLastVisitedDb: function () { // window.parent.mainController._reportLastVisited();
+    // ...
+
+  }, // reportLastVisitedDb
+//...
+});
+```
+^ And implemented corresponding endpoint
+
+And added the self reporting to switchPanel:
+```
+this.reportLastVisitedDb();
+
+---
+
+## IV. Deploy
+
