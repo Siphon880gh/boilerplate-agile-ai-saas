@@ -443,8 +443,14 @@ job:
 
 Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
 
+### Run API and Video Services
 
-### Login/Signup and Authorized Modules
+In two terminals, at each terminal run `pipenv shell`. This will kick into the virtualenv that's been created when you had ran `pipenv install` to install the Pipfile python packages. At each terminal, cd into `microservices/`
+
+Then to run the services at ports 5001 and 5002, at each respective terminal:
+`python api_service.py` and `python video_engine.py`
+
+### Review: Login/Signup and Authorized Modules
 
 #### Login/Signup Overview
 
@@ -552,7 +558,7 @@ var navController = {
 
 As this is a boilerplate, if you want to finish implementing the json web token, instead of only checking if a JWT exsists in the localStorage, you'd also send a request to `api_service.py` to check if the JWT is valid using the secret from the .env. In addition, you would implement JWT validation for each time `switchPanel` advances to another page.
 
-### Login/Signup Misc - Forgot Password, Legal
+#### Login/Signup Misc - Forgot Password, Legal
 
 
 Note forgot password is not implemented. At modals.php, we’ve added a placeholder the tech support email address:
@@ -562,7 +568,7 @@ Note forgot password is not implemented. At modals.php, we’ve added a placehol
 
 Because user can now access login and signup modals, this is a good time to delegate to your legal team or another agile member to draft a Terms and services to email you. Then you can link to it on the signup/login modal.
 
-## Authorized Modules
+## Review: Authorized Modules
 
 Again, after the user logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
 
@@ -672,13 +678,6 @@ With users, we can choose to offer free AI writing assistance to all users or on
 AI rewrite feature is at service/openai_rewrite.py. Adjust the prompt (at services/openai_rewrite.py:request_body) and adjust your api key (api key at .env as OPENAI_API_KEY )
 Not providing an openai api key will break the server from running: if you do not want to demonstrate AI rewrite because your app won’t have it, then at the bare minimum, remove if not api_key  and the next line raise ValueError ... at service/openai_rewrite.py, and more correctly, you remove openai_rewrite.py file, its usage at api_service.py and its usage at app-write-prompt
 
-For editing a completed slideshow from dashboard, app-edit-case will save a resumingModel then redirect to app-write-prompt, which checks for any existing resumingModel, then renders it if does exist
-```
-        if(window.parent.resumingModelAIPrompt) {
-            this.textarea.value = window.parent.resumingModelAIPrompt;
-        }
-```
-
 #### Upload Files
 
 app-upload-files actually implemented to upload files named after the users, since we now have users and implemented a database
@@ -718,7 +717,30 @@ Note that slideshow-engine is decoupled from the database which is best practice
 
 ^ Note the paths of the uploaded files are also passed to the slideshow-engine because the slideshow-engine cannot access the database for the filepaths, by design of decoupling.
 
-## Web Analytics
+
+#### Editing case
+
+After slideshows have been created, the user can see all previous slideshows at the dashboard. They can edit a slideshow:
+<img src="Readme-assets/snapshot-3-c-edit.png" style="width:200px; height:365px;"></img>
+
+That will open the write prompt module (or Alpine JS Iframe) with the user's old insructions prefilled. User can modify their instructions and complete another process to recreate that slideshow.
+
+So far you've learned that in our architecture, the parts of the app are in folders at app/. Many of these folders are iframe modules and some could be php partials (inside another iframe module). Here with `app-edit-case`, it's a rerouter module, meaning it may be present to the user for a split second, many times without the user knowing it. This iframe will make a request to the backend (microservices/api_service.py) for the old slideshow instructions, then saves it to a resumingModel at window.parent (outside the iframe). After that split second, `app-edit-case` will call switchPanel to show and refresh `app-write-prompt/`.  It checks for and renders any existing resumingModel:
+```
+        if(window.parent.resumingModelAIPrompt) {
+            this.textarea.value = window.parent.resumingModelAIPrompt;
+        }
+```
+
+Here it prefilled an already created slideshow's instructions for the user to take a second round:
+![screenshot](snapshot-3-g-prefilled-write-prompt.png)
+
+## Review: Backend
+
+So far we've only alluded to the backend. Many of the modules are now placed in "LIVE" mode (rather than "DEMO" mode when we were demonstrating each module individually to stakeholders). The modules in "LIVE" mode makes a function call when the user clicks a submit button. That messageParent calls the appropriate method in mainController at root assets/index.js. The mainController may update the local data model at appModel. And it may read from, or write to, the Mongo database: It makes a fetch request to an API endpoint running at port 5001. You have `microservices/api_service.py` and `microservices/video_engine.py` running at different terminals (or `concurrently` with Nodejs)
+
+
+## Review: Web Analytics
 
 Since we have users, we can add analytics to navController because the analytics need to be hooked to user visiting pages by navigating back/forth or clicking links on the page, so at root assets/index.js, we augment navController with an object merging:
 ```
