@@ -721,6 +721,7 @@ Note that slideshow-engine is decoupled from the database which is best practice
 #### Editing case
 
 After slideshows have been created, the user can see all previous slideshows at the dashboard. They can edit a slideshow:
+
 <img src="Readme-assets/snapshot-3-c-edit.png" style="width:200px; height:365px;"></img>
 
 That will open the write prompt module (or Alpine JS Iframe) with the user's old insructions prefilled. User can modify their instructions and complete another process to recreate that slideshow.
@@ -733,7 +734,8 @@ So far you've learned that in our architecture, the parts of the app are in fold
 ```
 
 Here it prefilled an already created slideshow's instructions for the user to take a second round:
-![screenshot](snapshot-3-g-prefilled-write-prompt.png)
+
+![screenshot](Readme-assets/snapshot-3-g-prefilled-write-prompt.png)
 
 ## Review: Backend
 
@@ -758,6 +760,7 @@ Object.assign(navController, {
 And added the self reporting to switchPanel:
 ```
 this.reportLastVisitedDb();
+```
 
 ---
 
