@@ -68,17 +68,6 @@ function requestDownloadModal() {
         $downloadModal.modal("show");
     }, 100);
 }
-// function secondsToHMS(seconds) {
-//     const hours = Math.floor(seconds / 3600);
-//     const minutes = Math.floor((seconds % 3600) / 60);
-//     const remainingSeconds = Math.floor(seconds % 60);
-
-//     const hh = hours.toString().padStart(2, '0');
-//     const mm = minutes.toString().padStart(2, '0');
-//     const ss = remainingSeconds.toString().padStart(2, '0');
-
-//     return `${hh}:${mm}:${ss}`;
-// } // secondsToHMS
 
 $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip({ placement: "right" }); // This initializes all tooltips

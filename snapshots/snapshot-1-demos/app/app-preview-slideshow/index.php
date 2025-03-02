@@ -67,7 +67,12 @@ cbust_ipad;
                     operator("../" + window.parent.appModel.finalVideo);
                     clearInterval(subscription1);
                     // Finished
-                } 
+                }
+
+                // Pretend a backend server finishes generating a video in 5 seconds:
+                setTimeout(() => {
+                    window?.parent?.appModel?.finalVideo = "demo/demo.mp4";
+                }, 5000);
             }
             var subscription1 = setInterval(observable, 100)
         }

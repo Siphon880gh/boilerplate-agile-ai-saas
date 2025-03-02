@@ -10,6 +10,7 @@
 echo <<<cbust_ipad
     <link href="../assets/common.css$v" rel="stylesheet">
     <link href="assets/index.css$v" rel="stylesheet">
+    <script src="../assets/screens.js$v"></script>
 cbust_ipad;
 ?>
 
@@ -60,7 +61,7 @@ cbust_ipad;
     const caseId = window.parent.getCaseId();
 
     // TODO: Upload files to the server in the next version
-    alert("TODO: Upload files to the server in the next version. Files would be saved in this format: file-<index>-aAPP_ABBREV-cCASE_ID-uUSER_ID.filetype. Proceeding to fake generation of slideshow.");
+    alert("TODO: Upload files to the server in the next version. Files would be saved in this format: file-<index>-a<APP_ABBREV>-c<CASE_ID>-<USER_ID>.filetype. Proceeding to fake generation of slideshow.");
     window.parent.switchPanel(SCREENS.PreviewSlideshow);
   } // messageParent
   </script>
