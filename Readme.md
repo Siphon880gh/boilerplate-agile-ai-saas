@@ -317,7 +317,7 @@ We will add user ability which also means adding a database and actually impleme
 
 ### Configurations
 
-As a foreword: You can setup the Mongo database by running the seed.py, which uses the utils/server/db.py as a unified point of truth to authenticate Mongo. The db.py refer to optional credentials in env.local (or leave empty for env vars if your local development has a Mongo that's not password protected). The db.py also referes to the database name in app.APP_ABBREV.config.json. That config file also has the app abbreviation that is used to name user assets (Like - it’ll be part of the file naming system that is file-<INDEX>-a<APP_ABBREV>-c<CASE_ID>-<USER_ID>.fileextension) and to tag the field APP_ID in many Mongo documents, allowing the same engine (like slideshow engine) to be used across multiple apps by having different app id's or app abbreviations.
+Overview: You can setup the Mongo database by running the seed.py, which uses the utils/server/db.py as a unified point of truth to authenticate Mongo. The db.py refer to optional credentials in env.local (or leave empty for env vars if your local development has a Mongo that's not password protected). The db.py also referes to the database name in app.APP_ABBREV.config.json. That config file also has the app abbreviation that is used to name user assets (Like - it’ll be part of the file naming system that is file-<INDEX>-a<APP_ABBREV>-c<CASE_ID>-<USER_ID>.fileextension) and to tag the field APP_ID in many Mongo documents, allowing the same engine (like slideshow engine) to be used across multiple apps by having different app id's or app abbreviations.
 
 If adopting the app to your use case, you would rename app.APP_ABBREV.config.json. Let's say your app's name is Pineapple, then you could rename it app.pappl.config.json or app.pineapple.config.json. You would update the database name and app abbreviation inside the config file. Then you would update references to that file's filename at (you could grep for them):
 - .//app/microservices/api_service.py:12:app_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app.APP_ABBREV.config.json")
@@ -362,6 +362,8 @@ load_dotenv(override=True, dotenv_path=dotenv_path_local)
 
 Run `python seed.py` to seed your Mongo database. You will notice a lot of documents with these fields `userId: "err", appId: "APP_ID", caseId: 1,`
 The idea is that there are users under your app, which may use the same slideshow engine as other apps, and therefore you have user id's and app id's. The case id's represent the slideshow that the user creates. If adopting to your case, it could represent a song the user is creating or a video the user is creating.
+
+See if running the seed file produced collections. You can use Compass to view your collections or use the Mongo shell commands. If you see such collections, then you've properly connected to Mongo on your computer because seeds.py and all other python scripts that connect to the database all use db.py that authenticates Mongo.
 
 Example user collection:
 ```
@@ -441,19 +443,147 @@ job:
 
 Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
 
+
 ### Login/Signup
+
+#### Login/Signup Overview
 
 We want a place for users to login or signup if not logged in (Auth landing page). And if they’re logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
 
+app-auth-landing/:
 ![image](Readme-assets/snapshot-3-a-auth-landing.png)
 
+app-dashboard/:
 ![image](Readme-assets/snapshot-3-b-dashboard.png)
-
 
 <center>
 And going to edit a finished slideshow:
 <img src="Readme-assets/snapshot-3-c-edit.png" style="width:200px; height:365px;"></img>
 </center>
+
+
+#### Login/Signup Module and Modals
+
+We add a new module app-auth-landing/ to the Alpine JS Iframes at index.php:
+```
+      <!-- Panel Auth Form -->
+      <div id="panel-13" x-show="activePanel === SCREENS.AuthLanding;" class="dynamic-panel min-h-screen min-w-screen"
+        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
+        <iframe src="app-auth-landing/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
+          height="100%"></iframe>
+      </div>
+```
+
+The auth-landing-page will open up modal style because that’s what we decided for login / signup modals. A modal works visually for any point that "pauses" the app, in which case you are logging in or signing up, before resuming the app. 
+
+
+Thusly, we added the signup login modals to modals.php (abridged):
+```
+  <!-- Modal Login -->
+  <div class="modal fade modal-lg" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel">
+    <div class="modal-dialog responsive-fix-login">
+...
+  </div>
+  </div> <!-- Login Modal -->
+
+  <!-- Signup Modal -->
+  <div class="modal modal-lg fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel">
+    <div class="modal-dialog responsive-fix-register">
+...
+    </div>
+  </div> <!-- Signup Modal -->
+```
+
+That modals.php refers to js and css files at app-auth-landing:
+```
+<?php
+echo <<<cbust_ipad
+  <script src="app-auth-landing/assets/index.js$v"></script>
+  <link href="app-auth-landing/assets/index.css$v" rel="stylesheet"></link>
+cbust_ipad;
+?>
+```
+
+^ The root modals.php’s signup and login modals have delegated functions for submitting registration or logged in details and those functions are housed at app-auth-landing/
+^ You may notice the term cbust_ipad. This is the type of version cache busting that can break ipad’s tendency to be stick with caching (even ignoring apache or nginx settings to always have a fresh asset). You’re changing the product a lot as you’re still developing it and want others to see the latest changes.
+
+With user signup and login ability, we’ve added an `authController` at root `app/index.js` to communicate with the app and the backend at `microservices/api_service.py`. 
+
+Note forgot password is not implemented. At modals.php, we’ve added a placeholder the tech support email address:
+```
+<a href="javascript:void(0)" class="text-gray-600 no-underline" onclick="alert('Please contact EMAIL_HERE')">Forgot password</a>
+```
+
+#### Login/Signup Module Partials
+
+The auth landing page could have several styles and company logos because it's the first page that the user sees when going to the app and isn't logged in. For this reason, auth-landing-page/ is actually an Alpine JS Iframe module that has PHP partial at the whitelabeling system:
+- assets--whitelabeler/branding-default/partial-auth-landing.php
+- assets--whitelabeler/branding-partner1/partial-auth-landing.php
+
+^ The brand-loader.php as discussed in a previous section decides the appropriate assets to load for the desired brand color combination or whitelabeled company. We've enhanced brand-loader.php to store the appropriate partial HTML: `$_SESSION['partial-auth-landing'] = $html`.
+
+#### Login/Signup JsonWebToken
+
+For being able to open the web browser later and remaining logged in, we’ve implemented jsonweb token. Jsonwebtoken inits are placed into root index.php:
+```
+  <script src="assets/jwt-paint-before.js$v"></script>
+...
+  <script src="assets/jwt-paint-after.js$v"></script>
+```
+
+Again, the JWT random series of letters and numbers you wrote to secure the json web token to your app is at .env file for the variable JWT_SECRET
+
+At the root app/index.js navController, we added a check for JWT before even allowing navigation back/forth to access a protected page (modules: read instructions, write instructions, upload files, and preview slideshow).
+
+FYI, popstate checks JWT like so:
+```
+var navController = {
+  beforePopstate: -1,
+  init: function () {
+    window.addEventListener("popstate", function (e) {
+      // debugger;
+      var jwt = localStorage.getItem("YOUR_APP_jwt");
+      if (jwt) {
+...
+```
+
+As this is a boilerplate, if you want to finish implementing the json web token, instead of only checking if a JWT exsists in the localStorage, you'd also send a request to `api_service.py` to check if the JWT is valid using the secret from the .env. In addition, you would implement JWT validation for each time `switchPanel` advances to another page.
+
+
+### More Modules
+
+Then the rest of the Alpine JS Iframes at root index.php:
+```
+      <!-- Panel Edit Case -->
+      <div id="panel-11" x-show="activePanel === SCREENS.EditCase" class="dynamic-panel min-h-screen min-w-screen z-40" style="display: none;">
+        <iframe id="iframe-edit-case" src="about:blank" data-will-src="app-edit-case/" class="min-h-screen min-w-screen" frameborder="0" width="100%" height="100%"></iframe>
+      </div>
+
+
+      <!-- Panel Edit Profile -->
+      <div id="panel-12" x-show="activePanel === SCREENS.EditProfile;" class="dynamic-panel min-h-screen min-w-screen"
+        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
+        <iframe src="about:blank" data-will-src="app-profile/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
+          height="100%"></iframe>
+      </div>
+
+      <!-- Panel Auth Form -->
+      <div id="panel-13" x-show="activePanel === SCREENS.AuthLanding;" class="dynamic-panel min-h-screen min-w-screen"
+        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
+        <iframe src="app-auth-landing/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
+          height="100%"></iframe>
+      </div>
+
+      <!-- Panel Dashboard-->
+      <div id="panel-14" x-show="activePanel === SCREENS.Dashboard;" class="dynamic-panel min-h-screen min-w-screen"
+        data-off-class="dynamic-panel-1 bg-white p-6 border rounded-lg ">
+        <iframe src="about:blank" data-will-src="app-dashboard/" class="dynamic-panel min-h-screen min-w-screen" frameborder="0" width="100%"
+          height="100%"></iframe>
+      </div>
+```
+
+
+#### Editing Profile
 
 
 
