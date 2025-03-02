@@ -581,7 +581,7 @@ Note forgot password is not implemented. At modals.php, we’ve added a placehol
 
 Because user can now access login and signup modals, this is a good time to delegate to your legal team or another agile member to draft a Terms and services to email you. Then you can link to it on the signup/login modal.
 
-## Review: Authorized Modules
+### Review: Authorized Modules
 
 Again, after the user logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
 
@@ -752,14 +752,14 @@ Here it prefilled an already created slideshow's instructions for the user to ta
 
 ![screenshot](Readme-assets/snapshot-3-g-prefilled-write-prompt.png)
 
-## Review: Backend
+#### Review: Backend
 
 So far we've only alluded to the backend. Many of the modules are now placed in "LIVE" mode (rather than "DEMO" mode when we were demonstrating each module individually to stakeholders). The modules in "LIVE" mode makes a function call when the user clicks a submit button. That messageParent calls the appropriate method in mainController at root assets/index.js. The mainController may update the local data model at appModel. And it may read from, or write to, the Mongo database: It makes a fetch request to an API endpoint running at port 5001. You have `microservices/api_service.py` listening at port 5001, and when an API endpoint gets hit, it receives whatever request body, then updates or reads from the Mongo database appropriately. When on the preview slideshow page, the same `api_service.py` passes request body and other information from Mongo to a function that creates the slideshow. The api service imported `slideshow-engine/process.py` as the function that creates the slideshow. Since this is a boilerplate, it mimics creating a slideshow by copying slideshow-engine/demo/demo.mp4 into users/ as the slideshow and updates the user's case in Mongo document content.
 
 Because we want slideshow-engine decoupled from database so that it's unaware of any databases and its only role is to make slideshow videos, it took arguments of the name of the function (which has Mongo calls) and the name of the variables at process.py, and deferred to the function to do anything database related. It doesn't even have to be database related. This was discussed under the slideshow creation section.
 
 
-## Review: Web Analytics
+### Review: Web Analytics
 
 Since we have users, we can add analytics to navController because the analytics need to be hooked to user visiting pages by navigating back/forth or clicking links on the page, so at root assets/index.js, we augment navController with an object merging:
 ```
@@ -907,6 +907,8 @@ If your server is not old, you can use Docker / Docker Compose / Kubernetes. You
 ### Server level allocation
 
 You could buy or rent a dedicated server, then partition the server into the main SSH session and a virtual machine. Then you can assign IP address to the virtual machine and install apache or nginx and then you add a virtual bridge so that the main SSH session can communicate with the VM. You would've essentially createda  VPS. This allows you to manage your app that's on a VPS via the main server in SSH. If you had to rely on the IT team to restart your server whenever it crashes, you now isolated the full stack app to a VPS that you can restart from the main SSH session. This also allows you to allocate compute resources to the VPS.
+
+----
 
 ## V. BI, User Analytics, and Git Maintainability
 
