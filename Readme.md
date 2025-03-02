@@ -443,4 +443,19 @@ Jobs is basically a queing system that keep track of inputs that are very large 
 
 ### Login/Signup
 
+We want a place for users to login or signup if not logged in (Auth landing page). And if they’re logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
+
+![image](Readme-assets/snapshot-3-a-auth-landing.png)
+
+![image](Readme-assets/snapshot-3-b-dashboard.png)
+
+
+<center>
+And going to edit a finished slideshow:
+<img src="Readme-assets/snapshot-3-c-edit.png" style="width:200px; height:365px;"></img>
+</center>
+
+
+
+
 **TO BE CONTINUED... WIP since 3/1/25**
