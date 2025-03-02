@@ -72,6 +72,6 @@ if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=5001)
     try:
         app = create_app()
-        runServer2(app) # from runtime.env.py which runs local `app.run(debug=True, port=5002)` or remote https `app.run(ssl_context=ssl_context, host='0.0.0.0', port=5001, debug=True)`
+        runServer2(app) # runServer() from built runtime/run_server.py
     except NameError:
         print("Remote/local setup not setup right")

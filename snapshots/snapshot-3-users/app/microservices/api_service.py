@@ -281,7 +281,7 @@ def create_app():
                 job_id = content.get("jobId", "")
 
                 # Delete the job from the databas
-                if job_id is not "":
+                if job_id != "":
                     jobs = db["jobs"]
                     jobs.delete_one({ "_id": ObjectId(job_id)})
 

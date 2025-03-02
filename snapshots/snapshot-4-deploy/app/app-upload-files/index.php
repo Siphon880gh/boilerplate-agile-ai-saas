@@ -125,7 +125,7 @@ cbust_ipad;
             window.parent.mainController.addToJobQueue({
               labels: labelsDTO
             }, (resource)=>{
-              window.parent.mainController.performJob(resource.serverVideoMode, resource.jobId);
+              window.parent.mainController.performJob(window.serverVideoMode, resource.jobId);
             })
         }
     })
@@ -227,6 +227,7 @@ echo <<<cbust_ipad
 cbust_ipad;
 ?>
 
+<?php include("../runtime/serverVideoMode.php"); ?>
 <?php include("../app-add-text-overlays/index.php"); ?>
 
 </body>

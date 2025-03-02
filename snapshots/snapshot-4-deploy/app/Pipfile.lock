@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "fad73551702e6a55fd5106377bf15e4ee8b004036b3876505f7f7647e492804e"
+            "sha256": "63079290f9ae4d606455d9c9de263f724cf9de9e60be0c7d94566661c582e28a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -452,7 +452,7 @@
                 "sha256:4952dfeef3c3947957f6d5dedb1f4ca31c6e509a476891062396834048aeed2a",
                 "sha256:6eb2e5244e7a16b85c10b5c2fe0f7bf961b40fcb9f1a9fd1bd1d2c2f8fb3cd65"
             ],
-            "markers": "python_version >= '3.8'",
+            "markers": "python_version >= '3.4'",
             "version": "==2.35.1"
         },
         "imageio-ffmpeg": {
@@ -464,7 +464,7 @@
                 "sha256:7fa9132a291d5eb28c44553550deb40cbdab831f2a614e55360301a6582eb205",
                 "sha256:89efe2c79979d8174ba8476deb7f74d74c331caee3fb2b65ba2883bec0737625"
             ],
-            "markers": "python_version >= '3.5'",
+            "markers": "python_version >= '3.4'",
             "version": "==0.5.1"
         },
         "importlib-metadata": {

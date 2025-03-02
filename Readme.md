@@ -448,7 +448,11 @@ job:
 }
 ```
 
-Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
+Jobs basically tracks inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details AND the content details will be used to generate the slideshow. Will be discussed why we’ve saving the inputs in jobs collections instead of passing them directly to the api endpoint that will create a video, but briefly it's because we will use SSE+Multithreading more suitable for long processing times instead of fetching (`fetch` calls), and the SSE protocol limits how much of data you can pass in the request. 
+
+The naming is "it's a job and here's the details how to do the job". The content document's jobId is joined with the job by its _id, and the joined documents have all the details needed to create the slideshow. And by naming the document jobs, it's semantically communicated that you can also implement a queue system such as having only X number of videos generating at any time (not implemented in this boilerplate).
+
+For this boilerplate, our jobs don't have any details. Labeling graphics are at the content document instead of at the job document because it's not a very large input. But let's say you're creating a video generator instead of a slideshow generator and you have a timeline where user edits in a lot of transitions and size positions - that will overwhelm the request size limitations of SSE calls. So instead, you update the job document once or incrementally. It would be stored as key-values in the data field of the job document.
 
 ### Run API Service
 
@@ -699,7 +703,9 @@ The post size for mp4 and other video files tending to be large in file sizes. T
 
 This is a boilerplate, so we don’t actually implement taking the user’s instructions and files to create a slideshow using AI. However, it’s AI assisted at where the user enters their instructions to create the slideshow with the files. To mimic creating a slideshow, the slideshow-engine/ creates a 5 second delay, then copies slideshow-engine/demo/demo.mp4 to users/ photo and named it formulaically.
 
-Note that slideshow-engine is decoupled from the database which is best practice. So when the api call cranks up the slideshow-engine, it’s passed the variable name from the scope of the slideshow-engine, and the python module that will report to Mongo database:
+Because we want slideshow-engine decoupled from database so that it's unaware of any databases and its only role is to make slideshow videos, it took arguments of the name of the function (which has Mongo calls) and the name of the variables at process.py, and deferred to the function to do anything database related. It doesn't even have to be database related. 
+
+When the api call cranked up the slideshow-engine, it passed the variable name from the scope of the slideshow-engine, and the python module that will report to Mongo database:
 
 ```
          process_args = {
@@ -725,7 +731,7 @@ Note that slideshow-engine is decoupled from the database which is best practice
 ```
 
 ^ Note the paths of the uploaded files are also passed to the slideshow-engine because the slideshow-engine cannot access the database for the filepaths, by design of decoupling.
-
+^ report_from_slideshow.py actually contains the logic that updates the database.
 
 #### Editing case
 
@@ -748,7 +754,9 @@ Here it prefilled an already created slideshow's instructions for the user to ta
 
 ## Review: Backend
 
-So far we've only alluded to the backend. Many of the modules are now placed in "LIVE" mode (rather than "DEMO" mode when we were demonstrating each module individually to stakeholders). The modules in "LIVE" mode makes a function call when the user clicks a submit button. That messageParent calls the appropriate method in mainController at root assets/index.js. The mainController may update the local data model at appModel. And it may read from, or write to, the Mongo database: It makes a fetch request to an API endpoint running at port 5001. You have `microservices/api_service.py` and `microservices/video_engine.py` running at different terminals (or `concurrently` with Nodejs)
+So far we've only alluded to the backend. Many of the modules are now placed in "LIVE" mode (rather than "DEMO" mode when we were demonstrating each module individually to stakeholders). The modules in "LIVE" mode makes a function call when the user clicks a submit button. That messageParent calls the appropriate method in mainController at root assets/index.js. The mainController may update the local data model at appModel. And it may read from, or write to, the Mongo database: It makes a fetch request to an API endpoint running at port 5001. You have `microservices/api_service.py` listening at port 5001, and when an API endpoint gets hit, it receives whatever request body, then updates or reads from the Mongo database appropriately. When on the preview slideshow page, the same `api_service.py` passes request body and other information from Mongo to a function that creates the slideshow. The api service imported `slideshow-engine/process.py` as the function that creates the slideshow. Since this is a boilerplate, it mimics creating a slideshow by copying slideshow-engine/demo/demo.mp4 into users/ as the slideshow and updates the user's case in Mongo document content.
+
+Because we want slideshow-engine decoupled from database so that it's unaware of any databases and its only role is to make slideshow videos, it took arguments of the name of the function (which has Mongo calls) and the name of the variables at process.py, and deferred to the function to do anything database related. It doesn't even have to be database related. This was discussed under the slideshow creation section.
 
 
 ## Review: Web Analytics
@@ -775,3 +783,156 @@ this.reportLastVisitedDb();
 
 ## IV. Deploy
 
+Now we will deploy the app to an online PHP server. Make sure to have installed python and nodejs at the online server.
+
+When it comes to the slideshow generation, there are factors to consider:
+- There could be large filesizes from your uploads. This was solved by setting a larger post size using htaccess (apache) or conf (nginx) at an earlier section when we were setting up for local development.
+- There could be large json or text data to send on the request to make the video which SSE limits to an extent, so we had job Mongo documents as discussed previously.
+- Video could take a long time to generate. We can control how much of the GPU or CPU is being used to generate one video. We can implement a queue system that only allows X number of users to generate a video at the same time (not in this boilerplate).
+- Video could take a long time to generate and the user's browser settings (given that you've extended the amount of time for your server) would reject the request during the wait for a response from a fetch request. This will be solved with SSE (Server sent event) which is a one way server sends data to frontend as many times as needed until the connection ends by the frontend (it could receive and parse a data with the string "END").
+- Video service or server could crash. We can use supervisor that restarts with the server and can restart python scripts if it detects a script is down.
+
+### Build Script: SSE vs Fetch
+
+The problem with replacing fetch calls with SSE is that during development, SSE obscures many of the errors and console logs, so you want a switch. The SSE call versus fetch call is made on the javascript side. 
+
+At build-scripts/package.json are these npm scripts:
+```
+    "change-video-server:sse+multithreading": "echo '<script class='built-runtime'>window.serverVideoMode=`SSE+MULTITHREADING`;</script>' > ../runtime/serverVideoMode.php",
+    "change-video-server:fetch": "echo '<script class='built-runtime'>window.serverVideoMode=`FETCH`;</script>' > ../runtime/serverVideoMode.php",
+```
+
+So you can switch between SSE and Fetch by cd'ing into build-scripts/, then running `npm run ___`. 
+
+The script creates a runtime/serverVideoMode.php partial that expresses a script block defining window.serverVideoMode flag as either "SSE+MULTITHREADING" or "FETCH". It's decided to place into a runtime/ folder because it has to do with on demand when the user makes a slideshow during runtime.
+
+At the upload files module, that partial is rendered, and so there's a window.serverVideoMode. Then when the user clicks to go next from the upload files module, it calls mainController.performJob, passing along the window.serverVideoMode. Depending on the window.serverVideoMode, performJob will make a fetch call to an api endpoint to port 5001 which is listened by api_service.py, OR it will start a SSE connection to port 5001. 
+
+The backend has two "api endpoints" for fetch and SSE respectively, but they both call python function create_video to keep the business logic separate between video generation and api endpoint. When calling create_video from inside api_service.py, it passes serverVideoMode to createVideo, for a lack of better term. This serverVideoMode is not from the frontend, but the backend already knows which serverVideoMode flag to pass because it's either the fetch API endpoint or the SSE API endpoint that matched.
+
+### Different Python Interpreter and Packages across systems
+
+At build-scripts/package.json, you notice the scripts:
+```
+    "build-dev-local-env": "cp Template-Dev-Local-Env ../.env.local",
+    "build-dev-host-curl": "cp Template-Dev-Host-Curl.php ../assets/common.php",
+    "build-dev-host-fetch": "cp Template-Dev-Host-Fetch.js ../assets/common.js",
+    "build-dev-host-process": "cp Template-Dev-Host-Process.py ../runtime/run_server.py",
+    "build-dev-pyenv-pv": "cp Template-Dev-Python-Version ../.python-version",
+    "build-dev-pipfile": "cp Template-Dev-Pipfile ../Pipfile; cp Template-Dev-Pipfile.lock ../Pipfile.lock",
+    "build-SERVER_NAME-local-env": "cp Template-SERVER_NAMEVPS0-Local-Env ../.env.local",
+    "build-SERVER_NAME-host-curl": "cp Template-SERVER_NAMEVPS0-Host-Curl.php ../assets/common.php",
+    "build-SERVER_NAME-host-fetch": "cp Template-SERVER_NAMEVPS0-Host-Fetch.js ../assets/common.js",
+    "build-SERVER_NAME-host-process": "cp Template-SERVER_NAMEVPS0-Host-Process.py ../runtime/run_server.py",
+    "build-SERVER_NAME-pyenv-pv": "cp Template-SERVER_NAMEVPS0-Python-Version ../.python-version",
+    "build-SERVER_NAME-pipfile": "cp Template-SERVER_NAMEVPS0-Pipfile ../Pipfile; cp Template-SERVER_NAMEVPS0-Pipfile.lock ../Pipfile.lock",
+    "build-SERVER_NAME": "npm run build-SERVER_NAME-local-env && npm run build-SERVER_NAME-pyenv-pv && npm run build-SERVER_NAME-pipfile && npm run build-SERVER_NAME-host-curl && npm run build-SERVER_NAME-host-fetch && npm run build-SERVER_NAME-host-process",
+    "build-dev": "npm run build-dev-local-env && npm run build-dev-pyenv-pv && npm run build-dev-pipfile && npm run build-dev-host-curl && npm run build-dev-host-fetch && npm run build-dev-host-process"
+```
+
+The two main npm scripts are `build-SERVER_NAME` and `build-dev`. All the other scripts which bears similar names because of shared prefixed words, they are dependent scripts that either `build-SERVER_NAME` or `build-dev` calls. Calling those scripts basically copies files to the final destinations to have certain fetch URLs for both frontend and backend, depending on if it's a local development or your certain remote server. Notice the all-caps SERVER_NAME. This is for you to copy and paste or edit depending on if you have multiple remote servers where you will deploy the code. For example, if you have a hostinger instance and a GoDaddy instance, you could name them `build-hostinger` and `build-godaddy`, and you would duplicate the dependent scripts as well, and you duplicate the template files as well. At the template files, you have to adjust the url's and port numbers that makes sense for frontend and backend.
+
+For example, `Template-Dev-Host-Fetch.js`:
+```
+var finalHost = "http://127.0.0.1:5001";
+var baseUrl = "saas/app/";
+```
+
+At local development when it comes to js, port 5001 usually available for me to run the api_service.py, so that's finalHost. The baseUrl is for my php server which runs on Mamp and I have nested folders saas/app/ which contains the code. The php server runs relative to the folder that contains all my other websites as well.
+
+Also in the template files are Pipfiles, .python-version, and env.local files. .python-version because your computer or server hardware could only handle certain versions of pythons, which pyenv can keep consistent. Pipfile is pipenv managing the packages. The env.local are env variables that are tied to your computer system, such as credentials to your computer's Mongo.
+
+The template files also copy to runtime/run_server.py which contains functions runServer and runServer2 with their preferred port numbers. The api_service.py and video_engine.py which we will discuss in the next section, refer to those runServer and runServer2 to know whether to run in debug mode (more verbose errors) and what ports to run on.
+
+When you copied the app code to a new server, you would run the appropriate build script to copy over the template files to their destination files.
+
+### Microservices with allocations
+
+We have an api layer where the app makes requests to api_service.py and we have a video layer that gets the OK to make a video. You do not want to tie them all into the same python script, therefore instead of communicating internally in the app to port 5001, we communicate to port 5001 (for api) AND port 5002 (for video)
+
+We now have `microservices/api_service.py` for port 5001 and `microservices/video_engine.py` for port 5002.
+
+We had previously ran the python Flask servers directly like `python api_service.py` while inside the microservices folder in terminal. We now will use gunicorn (You have to install gunicorn on your local development or remote server). With gunicorn we can use worker processes (to use more of the CPU) or use multithreading (if you expect many connections).
+
+Therefore your api_service.py at port 5001 because you may expect multiple users, you'll prioritize multithreading over worker processes.
+
+And for your video_engine.py at port 5002 because it takes CPU/GPU resources to create a slideshow or video, you'll prioritize worker processes over multithreading.
+
+These worker processes and multithreading options are passed while gunicorn command is run. So we have a script file that runs such commands at:
+- infrastructure/supervisor-app-runs/supervisor_SERVER_NAME_api.sh
+- infrastructure/supervisor-app-runs/supervisor_SERVER_NAME_video.sh
+
+^ And those sh commands will take care of starting in the pyenv environment (for specific python version) and running pipenv packages in an already existing virtual env. FYI, without pyenv, pipenv virtual env is ran with `pyenv shell`, but with pyenv virtual env already in the shell, then you can override the packages with pipenv's by running `pipenv run <pyenv_ve_name>`.
+
+Gunicorn also can handle https connections, which you have to keep consistent (because frontend will be https making requests to port 5001 using https). SSL certs etc are defined an .env.local because it's specific to your server, and both .sh files do parse for the .env.local file and pass the SSL paths to gunicorn command:
+```
+cd $DIR_APP_ROOT
+export $(grep -v '^#' ./.env.local | xargs)
+```
+
+Notice that the absolute paths are important so that it can find .env.local. You have to adjust the paths for the .sh files at (exact path varies based on your server or OS):
+```
+DIR_APP_ROOT=/home/YOUR_USERNAME/htdocs/YOUR_DOMAIN/saas/app
+DIR_MICROSERVICES=/home/YOUR_USERNAME/htdocs/YOUR_DOMAIN/saas/app/microservices
+```
+
+When testing local development wise, you may not want to use supervisor because it could obscure errors and console logs. In that case, you run each python file separately when locally developing. In two terminals, at each terminal run `pipenv shell`. This will kick into the virtualenv that's been created when you had ran `pipenv install` to install the Pipfile python packages. At each terminal, cd into `microservices/`. Then to run the services at ports 5001 and 5002, at each respective terminal: `python api_service.py` and `python video_engine.py`. Or you can have a npm script using `concurrently` to run both flasks in the same terminal, although you risk obscuring some errors and console logs (delayed appearing until afer you terminate the servers).
+
+### Persistance
+
+Video service or server could crash. We can use supervisor that restarts with the server and can restart python scripts if it detects a script is down.
+
+You'd have to install supervisor on your remote server. It acts as a service so it can reboot whenever the server restarts.
+
+Supervisor is configured centrally at a config file. That config file can be set to monitor a folder for new app configurations. Each app configuration would point to a sh file mentioned above for gunicorns. So you have two supervisor apps:
+- infrastructure/supervisor-apps/supervisor_SERVER_NAME_api.conf
+- infrastructure/supervisor-apps/supervisor_SERVER_NAME_video.conf
+
+Depending on your server OS, the location of the Supervisor central config and the Supervisor app configs may differ.
+
+We recommend adding to the app/ package.json level new npm scripts to restart the supervisor for your different remote servers (Commands differ depending on the server OS):
+```
+"restart-SERVER_NAME": "echo 'RESTART PROCESSES\nIgnore errors because we are making sure everything shuts down.\n1. Shutdown supervisor.\n2. Shutdown all gunicorn which sometimes shutting down supervisor does not shut them down.\n3. Run build scripts for GoDaddy.\n4. Restart supervisor with designated supervisor log path (No need to pyenv activate app4 because supervisor will run shell script that activates the pyenv app4 virtual environment before running gunicorn)'; sudo systemctl stop supervisor; supervisorctl shutdown ; sleep 2s && ps aux | grep 5001 | grep -v grep | awk '{print $2}' | xargs kill ; sleep 2s && ps aux | grep 5002 | grep -v grep | awk '{print $2}' | xargs kill ; sleep 1s && cd build-scripts && npm run build-hostinger ; sudo supervisord -c /etc/supervisor/supervisord.conf -l /var/log/supervisor/supervisord.log && echo 'Restarted supervisor'",
+```
+
+Refer to my full tutorial on Supervisor at:
+[Weng's tutorial on Supervisor](https://wengindustry.com/app/devbrain/?open=Supervisor Primer - GET STARTED (Python stack with Sh, Pyenv-virtualenvs, Pipenv, Gunicorn)#Supervisor-with-gunicorn-pyenv-pipenv)
+
+### Alternates
+
+If you were running NodeJS servers instead of python servers for your app case, you would use `nvm` instead of `gunicorn`. With nvm, you can have an`ecosystem.config.js` where you prioritize concurrency or cpu use. So the settings and marked down rather than passed as part of a shell command.
+
+If your server is not old, you can use Docker / Docker Compose / Kubernetes. You can also use AWS which is more reasonable if you will have a lot more traffic.
+
+### Server level allocation
+
+You could buy or rent a dedicated server, then partition the server into the main SSH session and a virtual machine. Then you can assign IP address to the virtual machine and install apache or nginx and then you add a virtual bridge so that the main SSH session can communicate with the VM. You would've essentially createda  VPS. This allows you to manage your app that's on a VPS via the main server in SSH. If you had to rely on the IT team to restart your server whenever it crashes, you now isolated the full stack app to a VPS that you can restart from the main SSH session. This also allows you to allocate compute resources to the VPS.
+
+## V. BI, User Analytics, and Git Maintainability
+
+### BI
+
+You may want business intelligence as users visit your web app. There are tools that automatically graph your new members and other analytics. Power BI and Tableu are well known, however they may be out of budget.
+
+We've added the free Metabase for BI
+- The metabase/ is a compose docker file for you to install metabase. It depends on postgres database existing on the server.
+- The app/biz-admin is meant for url exposure, so you could setup the url like: https://APP.com/biz-admin and it would redirect to the metabase dashboard
+
+
+### User analytics
+User flow analytics already implemented with users at Snapshot 3 Users.
+
+However, you may want more sophisticated analytics for funnels and user behaviors. Look into Google Analytics and Google Tags.
+
+Again, when releasing the app, you may want users to report bugs and suggest features, so the menu may be a good place for Google Form links (or design your own on the website to make it look consistent with the brand). Some good items may be Bug report and Request feature.
+
+### Git Maintainability
+
+You may choose to have a huge mono-repo of the entire app or one repo with nested repos:
+- git repo
+ - nested git repo as a submodule 1
+ - nested git repo as a submodule 2
+ - nested git repo as a submodule 3
+ - ..
+
+By having submodules, it wont complain about git conflicts with having a git inside a git. As another advantage, the slideshow-engine or any “engine” that you develop may be decoupled from the rest of your app as a whole other repo, allowing your other product line apps to use the same engine.
