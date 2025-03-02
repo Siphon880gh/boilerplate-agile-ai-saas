@@ -444,7 +444,7 @@ job:
 Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
 
 
-### Login/Signup
+### Login/Signup and Authorized Modules
 
 #### Login/Signup Overview
 
@@ -463,7 +463,7 @@ And going to edit a finished slideshow:
 </center>
 
 
-#### Login/Signup Module and Modals
+#### Login/Signup Module
 
 We add a new module app-auth-landing/ to the Alpine JS Iframes at index.php:
 ```
@@ -562,9 +562,18 @@ Note forgot password is not implemented. At modals.php, we’ve added a placehol
 
 Because user can now access login and signup modals, this is a good time to delegate to your legal team or another agile member to draft a Terms and services to email you. Then you can link to it on the signup/login modal.
 
-### More Modules
+## Authorized Modules
 
-Then the rest of the Alpine JS Iframes at root index.php:
+Again, after the user logged in, we want them to be able to see all the slideshows they finished (Dashboard). From the Dashboard, they can click a finished video to go to Edit the slideshow, which allows them to redo the slideshow starting from their previous instructions (which gets re-rendered into app-write-prompt and allows them to edit it)
+
+If the user signs up, there is no finished slideshows at the dashboard. However they can hit the New Slideshow button at the dashboard to start the process of creating one.
+
+At any time, the user could decide to Edit Profile via the menu.
+
+app-dashboard/:
+![image](Readme-assets/snapshot-3-b-dashboard.png)
+
+We added the rest of the modules (Dashboard, Edit Case, Edit Profile) to the Alpine JS Iframes at root index.php:
 ```
       <!-- Panel Edit Case -->
       <div id="panel-11" x-show="activePanel === SCREENS.EditCase" class="dynamic-panel min-h-screen min-w-screen z-40" style="display: none;">
@@ -599,8 +608,9 @@ Then the rest of the Alpine JS Iframes at root index.php:
 
 Because there’s an user, we can allow them to turn on newsletter or delete their profile (absolutely required in Europe now). So we added an Edit Profile feature (see it in action at the menu). And in case your app’s need requires profile pic and user name, we’ve implemented profile pic upload with cropping and user name to Edit Profile. The uploaded profile pic is placed in users/ folder as with all user uploaded content, and named formulaically.
 
-
 ![screenshot](Readme-assets/snapshot-3-d-edit-profile.png)
+
+^ The toggle css is at `assets/toggle-switch.css`
 
 At the profile, we also added advanced mode. Enabling advanced mode will allow you to add URLs along with files at the files upload page. To make this possible, both switchPanel and the popstate handling at navController checks the advanced mode then remove or show the advanced feature (URL adding at upload files in this case) accordingly. We will cover more changes to upload pages at a later readme section for this snapshot.
 
@@ -708,7 +718,7 @@ Note that slideshow-engine is decoupled from the database which is best practice
 
 ^ Note the paths of the uploaded files are also passed to the slideshow-engine because the slideshow-engine cannot access the database for the filepaths, by design of decoupling.
 
-#### Web Analytics
+## Web Analytics
 
 Since we have users, we can add analytics to navController because the analytics need to be hooked to user visiting pages by navigating back/forth or clicking links on the page, so at root assets/index.js, we augment navController with an object merging:
 ```
