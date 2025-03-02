@@ -896,7 +896,7 @@ We recommend adding to the app/ package.json level new npm scripts to restart th
 ```
 
 Refer to my full tutorial on Supervisor at:
-[Weng's tutorial on Supervisor](https://wengindustry.com/app/devbrain/?open=Supervisor Primer - GET STARTED (Python stack with Sh, Pyenv-virtualenvs, Pipenv, Gunicorn)#Supervisor-with-gunicorn-pyenv-pipenv)
+<a href="https://wengindustry.com/app/devbrain/?open=Supervisor Primer - GET STARTED (Python stack with Sh, Pyenv-virtualenvs, Pipenv, Gunicorn)#Supervisor-with-gunicorn-pyenv-pipenv" target="_blank">Weng's Supervisor Tutorial</a>
 
 ### Alternates
 
