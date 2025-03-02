@@ -225,7 +225,6 @@ var mainController = {
       }) // fetch
   },
   addToJobQueue: async (jobDetails, callback = () => { }) => {
-    // debugger;
 
     var userId = getUserId();
     var appId = getAppId();
@@ -256,130 +255,51 @@ var mainController = {
     }
 
 
-  }, // buildVideoFromAssets
+  }, // addToJobQueue
 
 
-  performJob: (serverVideoMode = "SSE+MULTITHREADING", jobId = -1) => {
+  performJob: (jobId = -1) => {
     if (jobId === -1) {
       alert("ERROR: Failed to prepare job. Please contact administrator.");
       return;
     }
 
-    function _ifSSEAndMultithreading() {
-      console.log("Server Video Mode: SSE with Multithreading");
-      var errored = false;
-      window.eventSource = new EventSource(`${finalHost}/media/video?jobId=${jobId}`);
+    var errored = false;
 
-      eventSource.onerror = function (event) {
-        console.error("Error occurred:", event);
-
-        // You can handle the error or retry logic here
-        if (event.readyState === EventSource.CLOSED) {
-          console.log("Connection was closed.");
-        }
-      };
-
-      eventSource.onmessage = function (event) {
-
-        if (event.data.indexOf('error') === 0) {
-          alert(event.data);
-          document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector(".is-loading").innerHTML = event.data;
+    fetch(`${finalHost}/media/video?jobId=${jobId}`, { method: "POST" })
+      .then(response => response.json())
+      .then(resource => {
+        if (resource.error === 1) {
+          alert(resource.error_desc);
+          document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector(".is-loading").innerHTML = resource.error_desc;
           errored = true;
-          eventSource.close();
+        } else {
+          appModel.finalVideo = resource.finalVideo;
+
+
+          // Decrement credit
+          creditsController.decrementGUI()
+
+          // Setup translate button to alert if not enough credit or let user go to translate page
+          var params = new URLSearchParams({
+            userId: getUserId(),
+            appId: getAppId()
+          })
+          fetch(finalHost + `/validate/credits?${params.toString()}`, {
+            method: "GET"
+          })
+            .then(response => response.json())
+            .then(resource => {
+              if (resource.error === 1) {
+                document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector("#want-translate").setAttribute("onclick", `alert("No credits available. Please buy more credits / upgrade / subscribe to create new videos.");`)
+              }
+            })
         }
-        // console.log(event.data);
-        if (event.data.indexOf("var") === 0) {
-          var [, key, value] = event.data.split(" ");
-          // debugger;
-          switch (key) {
-            case "finalVideo":
-              appModel.finalVideo = value;
-              break;
-          } // switch
-        } // if var
+      })
+      .catch(error => {
+        console.error("Error occurred:", error);
+      }); // fetch
 
-        console.log(event.data);
-
-        if (event.data.indexOf('finished_video') === 0) {
-          // Extract and use the video URL
-          eventSource.close();
-
-          if (!errored) {
-            // Delegated to a pub sub polling:
-            // - Hide loading cues
-            // - Prepare video source
-            // - Show video
-
-            // Decrement credit
-            creditsController.decrementGUI()
-
-            // Setup translate button to alert if not enough credit or let user go to translate page
-            var params = new URLSearchParams({
-              userId: getUserId(),
-              appId: getAppId()
-            })
-            fetch(finalHost + `/validate/credits?${params.toString()}`, {
-              method: "GET"
-            })
-              .then(response => response.json())
-              .then(resource => {
-                if (resource.error === 1) {
-                  document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector("#want-translate").setAttribute("onclick", `alert("No credits available. Please buy more credits / upgrade / subscribe to create new videos.");`)
-                }
-              })
-          } // !errored
-        }
-        // };
-      } // on message
-    } // ifSSE
-
-    function _ifFetch() {
-      console.log("Server Video Mode: Fetch");
-      var errored = false;
-
-      fetch(`${finalHost}/media/video?jobId=${jobId}`, { method: "POST" })
-        .then(response => response.json())
-        .then(resource => {
-          if (resource.error === 1) {
-            alert(resource.error_desc);
-            document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector(".is-loading").innerHTML = resource.error_desc;
-            errored = true;
-          } else {
-            appModel.finalVideo = resource.finalVideo;
-
-
-            // Decrement credit
-            creditsController.decrementGUI()
-
-            // Setup translate button to alert if not enough credit or let user go to translate page
-            var params = new URLSearchParams({
-              userId: getUserId(),
-              appId: getAppId()
-            })
-            fetch(finalHost + `/validate/credits?${params.toString()}`, {
-              method: "GET"
-            })
-              .then(response => response.json())
-              .then(resource => {
-                if (resource.error === 1) {
-                  document.querySelector("#iframe-preview-slideshow").contentWindow.document.querySelector("#want-translate").setAttribute("onclick", `alert("No credits available. Please buy more credits / upgrade / subscribe to create new videos.");`)
-                }
-              })
-          }
-        })
-        .catch(error => {
-          console.error("Error occurred:", error);
-        })
-    }
-
-    switch (serverVideoMode) {
-      case "SSE+MULTITHREADING":
-        _ifSSEAndMultithreading();
-        break;
-      case "FETCH":
-        _ifFetch();
-        break
-    } // switch
   } // performJob
 
 } // mainController

@@ -84,7 +84,7 @@ cbust_ipad;
     
 
     <?php
-    $step=7;
+    $step=4;
     include("../assets/steps.php");
     ?>
 

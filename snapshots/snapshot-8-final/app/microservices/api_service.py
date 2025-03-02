@@ -46,7 +46,6 @@ from utils.server.credits import check_ok_to_write_mux
 from dotenv import load_dotenv
 import os
 load_dotenv(override=True)
-SECRET_KEY_ELEV = os.getenv('ELEVENLABS_API_KEY', "")
 env_guest_mode = int(os.getenv('GUEST_MODE', 0))
 SECRET_KEY_JWT = os.getenv('JWT_SECRET', "")
 

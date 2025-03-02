@@ -443,12 +443,14 @@ job:
 
 Jobs is basically a queing system that keep track of inputs that are very large and when it’s time for the user’s slideshow to be generated, the job details WITH the content details will be used to generate the slideshow. Will be discussed why we’ve implemented jobs in the Snapshot for deployment and scaling, because we will use SSE+Multithreading instead of fetching when creating a slideshow and waiting it to respond back to the preview page with the video.
 
-### Run API and Video Services
+### Run API Service
 
-In two terminals, at each terminal run `pipenv shell`. This will kick into the virtualenv that's been created when you had ran `pipenv install` to install the Pipfile python packages. At each terminal, cd into `microservices/`
+Run `pipenv shell`. This will kick into the virtualenv that's been created when you had ran `pipenv install` to install the Pipfile python packages. Then cd into `microservices/`
 
-Then to run the services at ports 5001 and 5002, at each respective terminal:
-`python api_service.py` and `python video_engine.py`
+Then run the API service at port 5001:
+```
+python api_service.py
+```
 
 ### Review: Login/Signup and Authorized Modules
 

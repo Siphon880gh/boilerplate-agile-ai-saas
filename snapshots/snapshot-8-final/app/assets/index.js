@@ -225,7 +225,6 @@ var mainController = {
       }) // fetch
   },
   addToJobQueue: async (jobDetails, callback = () => { }) => {
-    // debugger;
 
     var userId = getUserId();
     var appId = getAppId();
@@ -256,7 +255,7 @@ var mainController = {
     }
 
 
-  }, // buildVideoFromAssets
+  }, // addToJobQueue
 
 
   performJob: (serverVideoMode = "SSE+MULTITHREADING", jobId = -1) => {

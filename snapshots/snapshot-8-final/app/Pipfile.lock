@@ -176,15 +176,6 @@
             "markers": "python_version >= '3.8'",
             "version": "==2.6.1"
         },
-        "elevenlabs": {
-            "hashes": [
-                "sha256:3f2fbcc7e4d8b6729bc0e278c691a08567ac0286d580c5da8db0928020bef23a",
-                "sha256:40b4835ce9dbaca86a2f84995e534bc8fb2081b1ff23027900fe85843407f6e6"
-            ],
-            "index": "pypi",
-            "markers": "python_version >= '3.8' and python_version < '4.0'",
-            "version": "==1.2.1"
-        },
         "exceptiongroup": {
             "hashes": [
                 "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b",

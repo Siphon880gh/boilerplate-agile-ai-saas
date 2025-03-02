@@ -140,6 +140,12 @@ cbust_ipad;
 
   </head>
   <body>
+
+  <?php
+    $step=3;
+    include("../assets/steps.php");
+  ?>
+
     <div class="container">
       <div class="header">
         <h1 class="h2-brand">Slideshow Creator</h1>

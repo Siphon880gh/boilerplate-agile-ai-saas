@@ -1,1 +1,0 @@
-The video microservice MUST BE at port 5002. The video microservice is an api call from the api microservice, so that port does not need to be listened on the internet, nor does it need to be reverse proxied into.

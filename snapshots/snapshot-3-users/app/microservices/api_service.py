@@ -46,7 +46,6 @@ from utils.server.credits import check_ok_to_write_mux
 from dotenv import load_dotenv
 import os
 load_dotenv(override=True)
-SECRET_KEY_ELEV = os.getenv('ELEVENLABS_API_KEY', "")
 env_guest_mode = int(os.getenv('GUEST_MODE', 0))
 SECRET_KEY_JWT = os.getenv('JWT_SECRET', "")
 
@@ -860,7 +859,7 @@ def create_app():
     # region jobs and videos
 
 
-    def createVideo(serverVideoMode, ids, data={}):
+    def createVideo(ids, data={}):
 
         userId = ids['userId']
         appId = ids['appId']
@@ -889,81 +888,6 @@ def create_app():
         if user is None:
             return jsonify({"error": 1, "error_desc": "User not found"}), 400
 
-        def background_task_video(queue=None):
-
-            vidCreatedInfo = None
-
-            try:
-                print("SSE+Multithreading: Indirect requesting video microservice which will call process()")
-                response = requests.post('http://127.0.0.1:5002/video-service', json=process_args, timeout=600)
-                response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                print(f"Request failed: {jsonify(e.response)}")
-
-            # Check if the request was successful
-            if response.status_code == 201:
-                # Return the response from the other API
-                # print("*********** response ***********")
-                # print(response.json())
-                vidCreatedInfo = response.json()
-                # print("*********** vidCreatedInfo ***********")
-                # print(vidCreatedInfo)
-            else:
-                if(queue is not None):
-                    queue.put(f"data: error {e}\n\n")
-                    queue.put("data: finished_video\n\n")
-                raise RuntimeError(jsonify({"error": "SSE+Multithreading: Failed to connect to the video microservice API, " + response.status_code}))
-
-            
-            print("SSE+Multithreading: Successfully returned video from video microservice which called process(). Now updating created date, credits, and returning video data to frontend.")
- 
-
-            if created is None:
-                contents.find_one_and_update(
-                    {"userId": userId, "appId": appId, "caseId":caseId}, 
-                    {"$set": {"content_is.created": get_current_time_hr()}},
-                    return_document=ReturnDocument.AFTER
-                )
-            
-            # Decrement credit on creating video
-            umems = db["user_membership"]
-            umem_able = umems.find_one({"userId": userId, "appId": appId})
-            if(umem_able):
-                if("creditsTimesOne" in umem_able and umem_able["creditsTimesOne"]>0):
-                    umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsTimesOne': -1}})
-                else:
-                    umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsAvailable': -1}})
-            else:
-                return jsonify({"error": 1, "error_desc": "User membership not found"}), 400
-
-            # print("*******  vidCreatedInfo printed before messaging *******")
-            # print(vidCreatedInfo)
-        
-            if(queue is not None):
-                queue.put(f"data: var finalVideo {vidCreatedInfo['finalVideo']}\n\n")
-                queue.put("data: finished_video\n\n")
-
-            return # Close SSE on the backend side
-
-        # def create_sse_video(appId, caseId, userId, created, user, contents, content, content_is):
-        def create_sse_video():
-            yield "data: processing_video\n\n"
-
-            q = queue.Queue()
-            threading.Thread(target=background_task_video, args=(q,)).start()
-
-            # Wait for a message from the background task
-            while True:
-                msg = q.get()
-                if msg is None:
-                    break
-                print(msg)
-                yield msg
-
-
-            # yield "data: finished_video\n\n"
-            # yield jsonify(vidCreatedInfo)
-
 
         process_args = {
             "filenameAttachIds":f"a{appId}-c{caseId}-{userId}",
@@ -985,47 +909,41 @@ def create_app():
             ],
             "app_dir": app_dir
         } # a with values
+        
 
-        # print("process_args: ", process_args)
-        # sys.exit()
-
-        print("\n\n")
-        if(serverVideoMode=="SSE+MULTITHREADING"):
-            return Response(create_sse_video(), content_type="text/event-stream")
-        else:
-            try:
-                vidCreatedInfo = process(**process_args) # process
-                if("error" in vidCreatedInfo and vidCreatedInfo["error"] == 1):
-                    print("Error: ", vidCreatedInfo)
-                    return jsonify(vidCreatedInfo), 400
-                print("FETCH: Direct process() Success: ", vidCreatedInfo)
+        try:
+            vidCreatedInfo = process(**process_args) # process
+            if("error" in vidCreatedInfo and vidCreatedInfo["error"] == 1):
+                print("Error: ", vidCreatedInfo)
+                return jsonify(vidCreatedInfo), 400
+            print("FETCH: Direct process() Success: ", vidCreatedInfo)
 
 
-                if created is None:
-                    contents.find_one_and_update(
-                        {"userId": userId, "appId": appId, "caseId":caseId}, 
-                        {"$set": {"content_is.created": get_current_time_hr()}},
-                        return_document=ReturnDocument.AFTER
-                    )
-            
-                # Decrement credit on creating video
-                umems = db["user_membership"]
-                umem_able = umems.find_one({"userId": userId, "appId": appId})
-                if(umem_able):
-                    if("creditsTimesOne" in umem_able and umem_able["creditsTimesOne"]>0):
-                        umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsTimesOne': -1}})
-                    else:
-                        umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsAvailable': -1}})
+            if created is None:
+                contents.find_one_and_update(
+                    {"userId": userId, "appId": appId, "caseId":caseId}, 
+                    {"$set": {"content_is.created": get_current_time_hr()}},
+                    return_document=ReturnDocument.AFTER
+                )
+        
+            # Decrement credit on creating video
+            umems = db["user_membership"]
+            umem_able = umems.find_one({"userId": userId, "appId": appId})
+            if(umem_able):
+                if("creditsTimesOne" in umem_able and umem_able["creditsTimesOne"]>0):
+                    umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsTimesOne': -1}})
                 else:
-                    return jsonify({"error": 1, "error_desc": "User membership not found"}), 400
+                    umem = umems.find_one_and_update({"userId": userId, "appId": appId}, {'$inc': {'creditsAvailable': -1}})
+            else:
+                return jsonify({"error": 1, "error_desc": "User membership not found"}), 400
 
 
 
-                return jsonify(vidCreatedInfo), 201
-                # rt.stop()
-            except Exception as e:
-                print("FETCH: Direct process() Error: ", e)
-                return jsonify({"error": 1, "error_desc": "Error in creating video because " + str(e)}), 400
+            return jsonify(vidCreatedInfo), 201
+            # rt.stop()
+        except Exception as e:
+            print("FETCH: Direct process() Error: ", e)
+            return jsonify({"error": 1, "error_desc": "Error in creating video because " + str(e)}), 400
 
 
     # POST http://127.0.0.1:5001/jobs
@@ -1076,24 +994,6 @@ def create_app():
                 print("Error updating job:", e)
                 return jsonify({"error": 1, "error_desc": str(e)}), 400
     
-    # SSE http://127.0.0.1:5001/media/video
-    @app.route("/media/video")
-    def createVideo_SSE():
-        jobId = request.args.get('jobId')
-        print("******************* createVideo_SSE()")
-        print(jobId)
-        job = db["jobs"].find_one({"_id": ObjectId(jobId)})
-        if job is None:
-            return jsonify({"error": 1, "error_desc": "Job not found"}), 400
-
-        data = job["data"]
-        userId = job.get("userId")
-        appId = job.get("appId")
-        caseId = job.get("caseId")
-
-        updateContentWith_JobId(userId, caseId, jobId)
-
-        return createVideo("SSE+MULTITHREADING", ids={"userId": userId, "appId": appId, "caseId": caseId}, data=data)
 
     # POST http://127.0.0.1:5001/media/video
     @app.route("/media/video", methods=["POST"])
@@ -1113,7 +1013,7 @@ def create_app():
         # print(appId)
         updateContentWith_JobId(userId, caseId, jobId)
 
-        return createVideo("FETCH", ids={"userId": userId, "appId": appId, "caseId": caseId}, data=data)
+        return createVideo(ids={"userId": userId, "appId": appId, "caseId": caseId}, data=data)
 
     # endregion jobs and videos
 

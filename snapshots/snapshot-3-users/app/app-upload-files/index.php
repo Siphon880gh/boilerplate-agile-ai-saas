@@ -100,7 +100,7 @@ cbust_ipad;
         } else {
             // Handle success
 
-            // Adapt the labeled pics as data transfer object to send to API endpoint at getFilesForBuildingVideo
+            // Adapt the labeled pics as data transfer object to send to API endpoint
             let labelsDTO = {}
             for(key in window?.labelsModel) {
                 $(".filename").each((i, filenameEl)=>{
@@ -125,7 +125,7 @@ cbust_ipad;
             window.parent.mainController.addToJobQueue({
               labels: labelsDTO
             }, (resource)=>{
-              window.parent.mainController.performJob(resource.serverVideoMode, resource.jobId);
+              window.parent.mainController.performJob(resource.jobId);
             })
         }
     })
@@ -140,6 +140,12 @@ cbust_ipad;
 
   </head>
   <body>
+
+  <?php
+    $step=3;
+    include("../assets/steps.php");
+  ?>
+
     <div class="container">
       <div class="header">
         <h1 class="h2-brand">Slideshow Creator</h1>

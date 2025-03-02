@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "echo 'SEMI-PRODUCTION Mode:\nMultithreading with SSE but isnt sh file running gunicorn. Faster. Not good at raising errors.\n\n'; cd build-scripts && npm run change-video-server:sse+multithreading; cd ../ && concurrently 'python microservices/api_service.py' 'python microservices/video_engine.py'",
-    "dev": "echo 'DEVELOPER Mode:\nFetch instead of multithreading with SSE. Slower. Good at raising errors. Video Microservice API still runs because translate video will revert to SSE, while main video generation will stick to fetch.\n\n'; cd build-scripts && npm run change-video-server:fetch; cd ../ && concurrently 'python microservices/api_service.py' 'python microservices/video_engine.py'",
     "dev1": "echo 'API Microservice\n'; python microservices/api_service.py",
     "dev2": "echo 'Video Microservice\n'; python microservices/video_engine.py",
     "seed": "python seed.py"
