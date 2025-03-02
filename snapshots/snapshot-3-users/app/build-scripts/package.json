@@ -1,0 +1,27 @@
+{
+  "name": "build-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "help": "cat package.json",
+    "change-video-server:sse+multithreading": "echo '<script class='built-runtime'>window.serverVideoMode=`SSE+MULTITHREADING`;</script>' > ../runtime/serverVideoMode.php",
+    "change-video-server:fetch": "echo '<script class='built-runtime'>window.serverVideoMode=`FETCH`;</script>' > ../runtime/serverVideoMode.php",
+    "build-dev-local-env": "cp Template-Dev-Local-Env ../.env.local",
+    "build-dev-host-curl": "cp Template-Dev-Host-Curl.php ../assets/common.php",
+    "build-dev-host-fetch": "cp Template-Dev-Host-Fetch.js ../assets/common.js",
+    "build-dev-host-process": "cp Template-Dev-Host-Process.py ../runtime/run_server.py",
+    "build-dev-pyenv-pv": "cp Template-Dev-Python-Version ../.python-version",
+    "build-dev-pipfile": "cp Template-Dev-Pipfile ../Pipfile; cp Template-Dev-Pipfile.lock ../Pipfile.lock",
+    "build-SERVER_NAME-local-env": "cp Template-SERVER_NAMEVPS0-Local-Env ../.env.local",
+    "build-SERVER_NAME-host-curl": "cp Template-SERVER_NAMEVPS0-Host-Curl.php ../assets/common.php",
+    "build-SERVER_NAME-host-fetch": "cp Template-SERVER_NAMEVPS0-Host-Fetch.js ../assets/common.js",
+    "build-SERVER_NAME-host-process": "cp Template-SERVER_NAMEVPS0-Host-Process.py ../runtime/run_server.py",
+    "build-SERVER_NAME-pyenv-pv": "cp Template-SERVER_NAMEVPS0-Python-Version ../.python-version",
+    "build-SERVER_NAME-pipfile": "cp Template-SERVER_NAMEVPS0-Pipfile ../Pipfile; cp Template-SERVER_NAMEVPS0-Pipfile.lock ../Pipfile.lock",
+    "build-SERVER_NAME": "npm run build-SERVER_NAME-local-env && npm run build-SERVER_NAME-pyenv-pv && npm run build-SERVER_NAME-pipfile && npm run build-SERVER_NAME-host-curl && npm run build-SERVER_NAME-host-fetch && npm run build-SERVER_NAME-host-process",
+    "build-dev": "npm run build-dev-local-env && npm run build-dev-pyenv-pv && npm run build-dev-pipfile && npm run build-dev-host-curl && npm run build-dev-host-fetch && npm run build-dev-host-process"
+  },
+  "author": "",
+  "license": "ISC"
+}

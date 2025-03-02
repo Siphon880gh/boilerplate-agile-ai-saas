@@ -306,4 +306,54 @@ In a related note, you may want to adjust the meta tags at index.php. It makes s
 ## III. User Ability and Database (Snapshot 3)
 
 
+We will add user ability which also means adding a database and actually implementing file uploading (because the files are associated to different users). Let's make sure your local development can handle this.
+
+### Setup
+1. Run `pipenv install` to install packages from Pipfile. Then because a new pipenv virtual environment for these package installations have been created, when running python or npm scripts you would first boot into the virtual environment with: pipenv shell
+
+2. And `composer install` against the composer.json file to install php dotenv.
+
+3. You also want to run `npm install`. NodeJS will not be used for our app’s actual code but will help with running the two python flask services api service and video engine simultaneously using the `concurrent` package. There’s no actual communication of Nodejs to the python files - the npm is just being used to run shell commands of running the python flask servers.
+
+As a foreword: You can setup the Mongo database by running the seed.py, which uses the utils/server/db.py as a unified point of truth to authenticate Mongo. The db.py refer to optional credentials in env.local (or leave empty for env vars if your local development has a Mongo that's not password protected). The db.py also referes to the database name in app.APP_ABBREV.config.json. That config file also has the app abbreviation that is used to name user assets (Like - it’ll be part of the file naming system that is file-<INDEX>-a<APP_ABBREV>-c<CASE_ID>-<USER_ID>.fileextension) and to tag the field APP_ID in many Mongo documents, allowing the same engine (like slideshow engine) to be used across multiple apps by having different app id's or app abbreviations.
+
+If adopting the app to your use case, you would rename app.APP_ABBREV.config.json. Let's say your app's name is Pineapple, then you could rename it app.pappl.config.json or app.pineapple.config.json. You would update the database name and app abbreviation inside the config file. Then you would update references to that file's filename at (you could grep for them):
+- .//app/microservices/api_service.py:12:app_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app.APP_ABBREV.config.json")
+- .//app/utils/server/db.py:8:app_config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'app.APP_ABBREV.config.json')
+- .//app/utils/server/credits.py:9:app_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app.APP_ABBREV.config.json")
+- .//app/app-auth-landing/init-session.php:7:$app_config_path = "../app.APP_ABBREV.config.json";
+
+If simply testing out the boilerplate's snapshot, leave everything as is (don't change filename of config file and leave the config contents intact).
+
+Refer to the sample env files at .env.sample and .env.local.sample, which are for protected secrets across different systems (OpenAI Secret keys, Jsonwebtoken, etc.), and protected secrets at the current system (Mongo authentication if applicable, internal api call url's, etc), respectively. In other words, the env would be for API keys etc that’s not related to your the current server or computer system the code is running at, but the env.local is for the Mongo credentials because it relates to the Mongo server on the current system. Create your own .env and .env.local out of those sample files. Update the following:
+- OPENAI_API_KEY because we will enhance slideshow instructions to have AI assist user to write the slideshow instructions.
+- JWT_SECRET come up with a random series of numbers and letters to make user's logged in sessions harder to hack by bad actors.
+- MongoDB credentials at .env.local are optional. If you're developing locally with an unprotected Mongo server that doesn't have authentication, you can omit.
+
+In a future snapshot, we will have build scripts that will replace the .env.local based on whether it’s your computer copy or a remote copy.
+
+FYI, PHP and python scripts have both loaded the .env and .env.local.
+
+- Here at PHP loading the dotenv for guest mode:
+```
+// Load the .env file
+$dotenv = Dotenv::createImmutable(__DIR__, ".env.local");
+$dotenv->load();
+
+$env_guest_mode = (int) ($_ENV['GUEST_MODE'] ?? 0);
+```
+
+^ For Guest mode we chose .env.local because we may want different domain addresses that offers or doesn't offer guest mode. Guest mode could a limited free signup for users. Based on the guest mode env variable, your PHP could choose to render or not render certain elements that allows the user to sign up as a guest. You could also have invitation token env variables that the PHP checks against the current request url to determine whether to render a modal that has a personalized invitation message.
+
+- Here a python script loads env variables:
+```
+# Specify important paths
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+dotenv_path_local = os.path.join(os.path.dirname(__file__), '..', '..', '.env.local')
+
+# Load the .env file from the specified path
+load_dotenv(override=True, dotenv_path=dotenv_path)
+load_dotenv(override=True, dotenv_path=dotenv_path_local)
+```
+
 **TO BE CONTINUED... WIP since 3/1/25**

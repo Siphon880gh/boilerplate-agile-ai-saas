@@ -1,0 +1,11 @@
+{
+  "name": "text-to-voice",
+  "version": "1.0.0",
+  "description": "Subtemplates of tailwind/bootstrap/fontawesome provided by: https://chat.openai.com/c/dbb6f8ec-25bd-454a-ae71-51593903d0d4",
+  "main": "index.js",
+  "scripts": {
+    "start": "python server.py"
+  },
+  "author": "",
+  "license": "ISC"
+}

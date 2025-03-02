@@ -1,0 +1,69 @@
+button[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.play-button {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.play-button:hover {
+    transform: scale(1.1);
+    /* Reduced for subtlety */
+}
+
+#preview-video {
+    z-index: 5;
+}
+.clickable {
+    cursor: pointer;
+}
+
+main .hoverable {
+    transition: color 0.3s ease;
+}
+main .hoverable:hover {
+    color: black;
+}
+
+/* No dark backdrop because it's inside iframe */
+.modal-backdrop.show {
+    filter: blur(20px);
+    background: rgba(255,255,255,1);
+    opacity: .8 !important;
+}
+
+.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    color: gray;
+}
+
+.coming-soon {
+    color: gray;
+    opacity: 30%;
+    filter: grayscale(100%);
+}
+
+#tip-div {
+    font-size: 16px;
+    color: #333;
+    margin-top: 20px;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+    font-style: italic;
+    cursor: e-resize;
+    height: 49px;
+}
+#tip-div::before {
+    content: 'Tip: ';
+    font-weight: bold;
+    color: #665;
+}
+.mt-20vh {
+    margin-top: 20vh;
+}
+.scale-1\.5 {
+    transform: scale(1.5);
+}
