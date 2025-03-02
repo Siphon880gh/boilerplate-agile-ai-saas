@@ -16,8 +16,15 @@ Third snapshot has user authentication, user accounts, and json web token for pe
 
 Fourth snapshot focuses on build scripts to quickly migrate the code online and to keep a persistent environment. For this purpose we are using pipenv and supervisor, rather than docker and kubernetes. A boilerplate for docker and kubernetes is coming soon for a future separate repository.
 
-In summary, this is agile because it's streamlined iteration processes with your team using developed modular components, and then it remains agile because then you combine the demo's into an app with user flow, then integrate user authentication / user management / daabases, and finally we sprinkle consistent environment that's scalable to future user traffic growth. The placeholder boilerplate is capable of connecting to ChatGPT for rewriting user's input, so it's AI assisted. With user memberships and tiers, this is a SaaS boilerplate.
+Fifth snapshot goes beyond into business analytics (with free metabase), user data reporting, and why not - maintainability with git submodules.
 
+snapshots/snapshot-1-demos
+snapshots/snapshot-2-app
+snapshots/snapshot-3-users
+snapshots/snapshot-4-deploy
+snapshots/snapshot-5-bi
+
+In summary, this is agile because it's streamlined iteration processes with your team using developed modular components, and then it remains agile because then you combine the demo's into an app with user flow, then integrate user authentication / user management / daabases, and finally we sprinkle consistent environment that's scalable to future user traffic growth. The placeholder boilerplate is capable of connecting to ChatGPT for rewriting user's input, so it's AI assisted. With user memberships and tiers, this is a SaaS boilerplate.
 
 ## I. Small Demo's with Team (Snapshot 1)
 

@@ -1,0 +1,9 @@
+SCREENS = {};
+SCREENS.ReadInstructions = 1;
+SCREENS.WritePrompt = 2;
+SCREENS.UploadFiles = 3;
+SCREENS.PreviewSlideshow = 4;
+SCREENS.EditCase = 11;
+SCREENS.EditProfile = 12;
+SCREENS.AuthLanding = 13;
+SCREENS.Dashboard = 14;
